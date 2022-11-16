@@ -53,7 +53,7 @@ void chequearRiego() // en "loop()"
 
 void acivarVentilacion()
 {
-	ventana.write(ANGULO_APERTURA);
+	Ventana.write(ANGULO_APERTURA);
 	digitalWrite(PIN_VENTILADOR, LOW);
 }
 
@@ -61,7 +61,7 @@ void acivarVentilacion()
 
 void desactivarVentilacion()
 {
-	ventana.write(ANGULO_CERRADO);
+	Ventana.write(ANGULO_CERRADO);
 	digitalWrite(PIN_VENTILADOR, HIGH);
 }
 

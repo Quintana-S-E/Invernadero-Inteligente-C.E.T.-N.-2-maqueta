@@ -1,14 +1,15 @@
 #ifndef Declaraciones_h
 #define Declaraciones_h
 #include <Arduino.h>
-#include <Wire.h> // I2C
-#include <DHT.h>
-#include <ESP32Servo.h>
+#include <Adafruit_GFX.h>	  // display OLED
 #include <Adafruit_Sensor.h>
 #include <Adafruit_SSD1306.h> // display OLED
-#include <Adafruit_GFX.h>	  // display OLED
 #include <ArduinoJson.h>
 #include <CTBot.h>
+#include <DHT.h>
+#include <ESP32Servo.h>
+#include <Wire.h> // I2C
+#include <WiFi.h> // Gráficos.h
 
 //#define DEBUGserial // Comentar para eliminar los Serial.print
 #ifdef DEBUGserial
@@ -50,14 +51,23 @@
 #define SOIL_INT_PIN A3
 //#define SOIL_INT_2_PIN A6 // Para el domo
 
+// ThingSpeak
+#define FIELD_TEMP_INT 1
+#define FIELD_TEMP_EXT 2
+#define FIELD_HUM_AIRE_INT 3
+#define FIELD_HUM_AIRE_EXT 4
+#define FIELD_HUM_SUELO_INT 5
+#define FIELD_HUM_SUELO_EXT 6
+
 // Clases
-CTBot bot;
-Servo ventana;
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
-DHT dhtInteriorLow(DHT_INT_LOW_PIN, DHT22);
-DHT dhtInteriorHigh(DHT_INT_HIGH_PIN, DHT22);
-DHT dhtExterior(DHT_EXT_PIN, DHT22);
-//DHT dhtInteriorMid(DHT_INT_MID_PIN, DHT22); // Para el domo
+CTBot Bot;
+Servo Ventana;
+WiFiClient Cliente;
+Adafruit_SSD1306 Display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+DHT DhtInteriorLow(DHT_INT_LOW_PIN, DHT22);
+DHT DhtInteriorHigh(DHT_INT_HIGH_PIN, DHT22);
+DHT DhtExterior(DHT_EXT_PIN, DHT22);
+//DHT DhtInteriorMid(DHT_INT_MID_PIN, DHT22); // Para el domo
 
 // Variables de tiempo
 unsigned long ultima_vez_invernadero_funciono = 0;
@@ -131,6 +141,9 @@ void displayConexionWIFI(String Amensaje_conectado_a, String Assid_conectada);
 void displayLecturas(bool Amostrando_humedad);
 void displayHum();
 void displayTemp();
+
+// Graficos.h
+void actualizarGraficos();
 
 
 #endif

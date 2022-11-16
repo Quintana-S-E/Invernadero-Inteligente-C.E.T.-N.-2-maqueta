@@ -23,18 +23,18 @@ void leerDHT22Interiores() // en leerSensores()
 	float humedad_aire_interior[2];
 	float temp_interior[2];
 
-	// leer a dhtInteriorLow
-	humedad_aire_interior[0] = dhtInteriorLow.readHumidity(); // %
-	temp_interior[0] = dhtInteriorLow.readTemperature();	  // Celsius
+	// leer a DhtInteriorLow
+	humedad_aire_interior[0] = DhtInteriorLow.readHumidity(); // %
+	temp_interior[0] = DhtInteriorLow.readTemperature();	  // Celsius
 
-	/* leer a dhtInteriorMid
-	humedad_aire_interior[0] = dhtInteriorMid.readHumidity();
-	temp_interior[0] = dhtInteriorMid.readTemperature();
+	/* leer a DhtInteriorMid
+	humedad_aire_interior[0] = DhtInteriorMid.readHumidity();
+	temp_interior[0] = DhtInteriorMid.readTemperature();
 	*/
 
-	// leer a dhtInteriorHigh
-	humedad_aire_interior[1] = dhtInteriorHigh.readHumidity();
-	temp_interior[1] = dhtInteriorHigh.readTemperature();
+	// leer a DhtInteriorHigh
+	humedad_aire_interior[1] = DhtInteriorHigh.readHumidity();
+	temp_interior[1] = DhtInteriorHigh.readTemperature();
 
 	// mirar si alguna lectura falló y finalizar antes (para empezar de nuevo).
 	/*
@@ -68,9 +68,9 @@ void leerSoilInteriores() // en leerSensores()
 
 void leerDHT22Exteriores() // en leerSensores()
 {
-	// leer a dhtExterior
-	humedad_aire_exterior = dhtExterior.readHumidity(); // %
-	temp_exterior = dhtExterior.readTemperature();		// Celsius
+	// leer a DhtExterior
+	humedad_aire_exterior = DhtExterior.readHumidity(); // %
+	temp_exterior = DhtExterior.readTemperature();		// Celsius
 
 	// mirar si alguna lectura falló y finalizar antes (para empezar de nuevo).
 	/*

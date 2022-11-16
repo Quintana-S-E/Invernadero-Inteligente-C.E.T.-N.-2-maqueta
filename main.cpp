@@ -9,6 +9,7 @@
 #include "Declaraciones.h" // contiene <Arduino.h> y todas las librerías
 #include "Display.h"
 #include "EEPROM_manejo.h"
+#include "Graficos.h"
 #include "Sensores.h"
 #include "Telegram.h"
 
@@ -30,14 +31,14 @@ void setup()
 		ESP32PWM::allocateTimer(1);
 		ESP32PWM::allocateTimer(2);
 		ESP32PWM::allocateTimer(3);
-	ventana.setPeriodHertz(50);
-	ventana.attach(PIN_SERVO);
-	ventana.write(ANGULO_CERRADO); // ya que "ventilando" se inicializa como false
+	Ventana.setPeriodHertz(50);
+	Ventana.attach(PIN_SERVO);
+	Ventana.write(ANGULO_CERRADO); // ya que "ventilando" se inicializa como false
 
 	// inicializar los sensores
-	dhtInteriorLow.begin();
-	dhtInteriorHigh.begin();
-	dhtExterior.begin();
+	DhtInteriorLow.begin();
+	DhtInteriorHigh.begin();
+	DhtExterior.begin();
 
 	// inicializar display
 	inicializarDisplay();
@@ -46,7 +47,7 @@ void setup()
 	imprimirln("Conectando a WIFI...");
 	displayConectandoWIFI();
 
-	bot.setMaxConnectionRetries(15);
+	Bot.setMaxConnectionRetries(15);
 	bool status_WIFI = false;
 	if (!status_WIFI) status_WIFI = conectarWIFI(SSIDescuela, PASSWORDescuela); // conectar al WIFI de la escuela
 	if (!status_WIFI) status_WIFI = conectarWIFI(SSIDnoni, PASSWORDnoni); // si no se pudo, probar con el de noni
@@ -58,7 +59,10 @@ void setup()
 	}
 
 	// conectar el bot a Telegram
-	bot.setTelegramToken(BOT_TOKEN);
+	Bot.setTelegramToken(BOT_TOKEN);
+
+	// inicializar ThingSpeak
+	ThingSpeak.begin(Cliente);
 
 	// leer o escribir la EEPROM
 	chequearEEPROMProgramada();
@@ -82,8 +86,9 @@ void loop()
 		chequearMensajesRecibidosTelegram();
 		chequearAlarma();
 
-		// Actualizar datos en el display
+		// Actualizar datos mostrables
 		displayLecturas(mostrando_humedad);
+		actualizarGraficos();
 
 		// Tomar decisiones
 		chequearVentilacion();

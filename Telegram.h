@@ -8,7 +8,7 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 {
 	TBMessage msj;
 	// mientras hayan nuevos mensajes
-	while (CTBotMessageText == bot.getNewMessage(msj))
+	while (CTBotMessageText == Bot.getNewMessage(msj))
 	{
 		imprimirln("Mensaje obtenido:");
 
@@ -17,7 +17,7 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 			// para comprobar la validez de la ID del solicitante
 			if (chat_id != CHAT_ID)
 			{
-				bot.sendMessage(chat_id, "Usuario no autorizado.");
+				Bot.sendMessage(chat_id, "Usuario no autorizado.");
 				continue;
 			}
 		#endif
@@ -54,7 +54,7 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 		{
 			respuesta = "Puede enviar los siguientes comandos:\n\n";
 			respuesta += "/info : Para revisar el estado del invernadero y los parámetros guardados\n";
-			respuesta += "/lecturas : Para obtener datos actuales de los sensores\n";
+			respuesta += "/lecturas : Para obtener datos actuales e históricos de los sensores\n";
 			respuesta += "/prog : Para efectuar órdenes y modificaciones";
 		}
 
@@ -72,6 +72,8 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 			respuesta += "Temperatura exterior: " + String(temp_exterior) + " °C\n";
 			respuesta += "Humedad del suelo exterior: " + String(humedad_suelo_exterior) + " u\n";
 			respuesta += "Humedad del aire exterior: " + String(humedad_aire_exterior) + " %\n";
+			respuesta += "\nPara ver gráficos históricos de los datos ingrese al link:\n";
+			respuesta += "https://thingspeak.com/channels/1937932";
 		}
 
 		else if (texto == "/prog")
@@ -101,7 +103,7 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 		/*else if (texto == "/abrir") // para controlar ventana y ventiladores por separado
 		{
 			ventanaAbierta = !ventanaAbierta;
-			ventanaAbierta ? (ventana.write(ANGULO_APERTURA)) : (ventana.write(ANGULO_CERRADO));
+			ventanaAbierta ? (Ventana.write(ANGULO_APERTURA)) : (Ventana.write(ANGULO_CERRADO));
 
 			respuesta = "La ventana está ahora ";
 			ventanaAbierta ? (respuesta += "abierta.") : (respuesta += "cerrada.");
@@ -268,7 +270,7 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 
 void enviarMensaje(uint64_t Aid, String Amensaje)
 {
-	bot.sendMessage(Aid, Amensaje);
+	Bot.sendMessage(Aid, Amensaje);
 	imprimirln("Respuesta del BOT:");
 	imprimirln(Amensaje);
 }
@@ -281,7 +283,7 @@ bool evaluarMensajeInt(uint16_t Avalor_min, uint16_t Avalor_max, String Aunidad)
 
 	TBMessage msj_FB;
 	// si llegó un mensaje
-	if (CTBotMessageText == bot.getNewMessage(msj_FB))
+	if (CTBotMessageText == Bot.getNewMessage(msj_FB))
 	{
 		respuesta_int = msj_FB.text.toInt(); // pasamos el texto a número
 		// si el número es válido
@@ -315,7 +317,7 @@ bool evaluarMensajeFloat(float Avalor_min, float Avalor_max, String Aunidad)
 
 	TBMessage msj_FB;
 	// si llegó un mensaje
-	if (CTBotMessageText == bot.getNewMessage(msj_FB))
+	if (CTBotMessageText == Bot.getNewMessage(msj_FB))
 	{
 		respuesta_float = msj_FB.text.toFloat(); // pasamos el texto a número
 		// si el número es válido
@@ -407,22 +409,24 @@ String obtenerInfo() // en "chequearMensajesRecibidosTelegram()"
 
 void chequearAlarma() // en "loop()"
 {
+	// no hay problema con que lapso_alarma_mins sea uint16_t, se multiplica por un UL
 	if (millis() - ultima_vez_alarma >= (lapso_alarma_mins * 60000UL)  &&  alarma_activada)
 	{
 		ultima_vez_alarma = millis();
-		if (chat_id == 0) return; // el usuario debe hablar al bot primeramente
+		if (chat_id == 0) return; // el usuario debe hablar al Bot primeramente
 		String mensaje;
+		mensaje = "ALARMA: ";
 
 		// evaluamos la temperatura
 		if (temp_interior_promedio >= temp_max_alarma) {
-			mensaje = "La temperatura del invernadero es excesivamente alta";
+			mensaje += "La temperatura del invernadero es excesivamente alta";
+			enviarMensaje(chat_id, mensaje);
 		}
 		else if (temp_interior_promedio <= temp_min_alarma) {
-			mensaje = "La temperatura del invernadero es excesivamente baja";
+			mensaje += "La temperatura del invernadero es excesivamente baja";
+			enviarMensaje(chat_id, mensaje);
 		}
-
-		bot.sendMessage(chat_id, mensaje);
-		imprimirln("Alarma: " + mensaje);
+		
 	}
 }
 
@@ -432,7 +436,7 @@ bool conectarWIFI(String Assid, String Apassword) // en "setup()"
 {
 	bool stat_WIFI;
 	String res_WIFI;
-	stat_WIFI = bot.wifiConnect(Assid, Apassword);
+	stat_WIFI = Bot.wifiConnect(Assid, Apassword);
 	res_WIFI = stat_WIFI ? "Conectado a la red:\n" : "No se pudo conectar a: ";
 	imprimirln(res_WIFI + String(Assid));
 
