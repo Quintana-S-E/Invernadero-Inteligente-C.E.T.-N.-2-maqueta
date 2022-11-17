@@ -420,7 +420,11 @@ String obtenerInfo() // en "chequearMensajesRecibidosTelegram()"
 	msj_FS += "(mín), ";
 	msj_FS += String(temp_max_alarma);
 	msj_FS += " °C ";
-	msj_FS += "(máx).";
+	msj_FS += "(máx).\n";
+
+	msj_FS += "-Temperatura de apertura de la ventilación: ";
+	msj_FS += String(temp_max_ventilacion);
+	msj_FS += " °C.";
 
 	return msj_FS;
 }
