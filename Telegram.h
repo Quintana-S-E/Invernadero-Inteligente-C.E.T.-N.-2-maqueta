@@ -87,6 +87,7 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 			respuesta += "/tiempoEspera : Para definir el tiempo de espera para volver a comprobar la necesidad de riego\n";
 			respuesta += "/tmax : Para programar el valor de temperatura máxima para la alarma\n";
 			respuesta += "/tmin : Para programar el valor de temperatura mínima para la alarma\n";
+			respuesta += "/tvent : Para programar el valor de temperatura de activación de ventilación\n";
 			respuesta += "/ventilar : Para forzar el cambio de la ventilación";
 			// respuesta += "/redpref :  Para elegir la red WiFi preferida\n";
 			// respuesta += "/resettiempo :  Para volver a cero el contador de tiempo\n";
@@ -242,6 +243,25 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 			{
 				temp_min_alarma = respuesta_float;
 				escribirEEPROM(direccion[2], temp_min_alarma);
+			}
+		}
+
+		else if (texto == "/tvent")
+		{
+			respuesta = "La temperatura de activación de la ventilación está configurada en: ";
+			respuesta += String(temp_max_ventilacion) + " °C";
+			enviarMensaje(chat_id, respuesta);
+
+			respuesta = "Introduzca un nuevo valor (entre ";
+			respuesta += String(temp_min_alarma) + " y ";
+			respuesta += String(temp_max_alarma) + ") ";
+			respuesta += "entero, o si desea enviarlo con decimales, utilice punto (ej: 35.4)";
+			enviarMensaje(chat_id, respuesta);
+
+			if (evaluarMensajeFloat(temp_min_alarma, temp_max_alarma, "°C")) // setea respuesta_int y la respuesta adecuada
+			{
+				temp_max_ventilacion = respuesta_float;
+				escribirEEPROM(direccion[3], temp_max_ventilacion);
 			}
 		}
 
