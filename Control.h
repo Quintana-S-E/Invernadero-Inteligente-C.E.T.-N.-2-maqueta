@@ -8,12 +8,12 @@ void chequearVentilacion() // en "loop()"
 {
 	if (ventilacion_forzada) return; // si la ventilación es forzada por telegram, ignorar lo automático
 
-	if (temp_exterior > temp_max_ventilacion && !ventilando)
+	if (temp_exterior >= temp_max_ventilacion && !ventilando)
 	{
 		ventilando = true;
-		acivarVentilacion();
+		activarVentilacion();
 	}
-	else if (temp_exterior <= TEMP_CIERRE_VENTILACION && ventilando)
+	else if (temp_exterior < temp_max_ventilacion && ventilando) // VER BIEN ESTO
 	{
 		ventilando = false;
 		desactivarVentilacion();
@@ -25,8 +25,8 @@ void chequearVentilacion() // en "loop()"
 // Regar y esperar el tiempo necesario para la filtración del agua antes de medir de nuevo
 void chequearRiego() // en "loop()"
 {
-	// apagar la bomba después del tiempo definido (ADV: VA A SER MEJOR PONER UN DELAY, CAPAZ)
-	if (millis() - ultima_vez_bomba >= (tiempo_de_bomba_segs * 1000UL)){
+	// apagar la bomba después del tiempo definido
+	if (millis() - ultima_vez_bomba >= (tiempo_de_bomba_segs * 1000UL)) {
 		digitalWrite(PIN_BOMBA, HIGH);
 	}
 
@@ -41,7 +41,7 @@ void chequearRiego() // en "loop()"
 	}
 
 	// chequear la humedad y regar (si no se está esperando la filtración del agua)
-	if (humedad_suelo_exterior >= sequedad_suelo_max && !esperando_riego)
+	if (humedad_suelo_exterior <= humedad_suelo_min && !esperando_riego)
 	{
 		ultima_vez_bomba = millis();
 		digitalWrite(PIN_BOMBA, LOW);
@@ -51,9 +51,9 @@ void chequearRiego() // en "loop()"
 
 //==================================================================================================================//
 
-void acivarVentilacion()
+void activarVentilacion()
 {
-	Ventana.write(ANGULO_APERTURA);
+	Ventana.write(ANGULO_APERTURA); // sacar cuando separemos ventiladores de ventana
 	digitalWrite(PIN_VENTILADOR, LOW);
 }
 
@@ -61,16 +61,32 @@ void acivarVentilacion()
 
 void desactivarVentilacion()
 {
-	Ventana.write(ANGULO_CERRADO);
+	Ventana.write(ANGULO_CERRADO); // sacar cuando separemos ventiladores de ventana
 	digitalWrite(PIN_VENTILADOR, HIGH);
 }
 
-//==================================================================================================================//
+//==========================HABILITAR PARA CUANDO SEPAREMOS LOS VENTILADORES DE LA VENTANA==========================//
+/*
+void abrirVentana()
+{
+	Ventana.write(ANGULO_APERTURA);
+}
 
-/*// Identifica la necesidad de iluminar, basándose en la lectura de un sensor LDR
+//==========================HABILITAR PARA CUANDO SEPAREMOS LOS VENTILADORES DE LA VENTANA==========================//
+
+void cerrarVentana()
+{
+	Ventana.write(ANGULO_CERRADO);
+}
+
+//================================================FUTURAS VERSIONES=================================================//
+void
+
+//================================================FUTURAS VERSIONES=================================================//
+// Identifica la necesidad de iluminar, basándose en la lectura de un sensor LDR
 void chequear_iluminacion()
 {
-	//...
+	// ...
 }*/
 
 

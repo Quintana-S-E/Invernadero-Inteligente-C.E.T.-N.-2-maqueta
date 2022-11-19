@@ -73,6 +73,7 @@ DHT DhtExterior(DHT_EXT_PIN, DHT22);
 unsigned long ultima_vez_invernadero_funciono = 0;
 unsigned long ultima_vez_display_cambio = 0;
 unsigned long ultima_vez_display_actualizo = 0;
+unsigned long ultima_vez_thingspeak = 0;
 unsigned long ultima_vez_bomba = 0;
 unsigned long ultima_vez_alarma = 0;
 
@@ -129,8 +130,10 @@ String obtenerInfo();
 // Control.h
 void chequearVentilacion();
 void chequearRiego();
-void acivarVentilacion();
+void activarVentilacion();
 void desactivarVentilacion();
+//void abrirVentana();
+//void cerrarVentana();
 //void chequear_iluminacion();
 
 // Display.h

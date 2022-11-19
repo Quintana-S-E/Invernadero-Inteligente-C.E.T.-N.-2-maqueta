@@ -10,31 +10,33 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 	// mientras hayan nuevos mensajes
 	while (CTBotMessageText == Bot.getNewMessage(msj))
 	{
+		String texto = msj.text;
+		String nombre_solicitante = msj.sender.firstName;
+		respuesta = ""; // borramos lo que hayamos escrito en llamadas anteriores
+		// imprimir el mensaje recibido
 		imprimirln("Mensaje obtenido:");
+		imprimirln(texto);
 
-		chat_id = msj.sender.id;
-		#ifdef CHAT_ID
+		bool respondiendo_grupo;
+		if (msj.sender.id != msj.group.id) // si no se le habla por grupo, msj.group.id = msj.sender.id
+		{
+			chat_id = msj.group.id;
+			respondiendo_grupo = true;
+		}
+		else
+		{
+			chat_id = msj.sender.id;
+			respondiendo_grupo = false;
+		}
+
+		#ifdef CHAT_ID_AUTORIZADO
 			// para comprobar la validez de la ID del solicitante
-			if (chat_id != CHAT_ID)
+			if (msj.sender.id != CHAT_ID_AUTORIZADO)
 			{
 				Bot.sendMessage(chat_id, "Usuario no autorizado.");
 				continue;
 			}
 		#endif
-
-		bool respondiendo_grupo = false;
-		if (chat_id != msj.group.id) // si no se le habla por grupo, msj.group.id = msj.sender.id
-		{
-			chat_id = msj.group.id;
-			respondiendo_grupo = true;
-		}
-
-		// imprimir el mensaje recibido
-		String texto = msj.text;
-		imprimirln(texto);
-
-		String nombre_solicitante = msj.sender.firstName;
-		respuesta = ""; // borramos lo que hayamos escrito en llamadas anteriores
 
 		// si es el primer mensaje que recibe
 		if (primer_mensaje)
@@ -66,11 +68,11 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 		else if (texto == "/lecturas")
 		{// leerSensores() es llamada justo antes en el loop, así que no la llamamos para no retrasar
 			respuesta = "Temperatura interior: " + String(temp_interior_promedio) + " °C\n";
-			respuesta += "Humedad del suelo interior: " + String(humedad_suelo_interior) + " u\n";
+			respuesta += "Humedad del suelo interior: " + String(humedad_suelo_interior) + " %\n";
 			respuesta += "Humedad del aire interior: " + String(humedad_aire_interior_promedio) + " %\n";
 			respuesta += "\n";
 			respuesta += "Temperatura exterior: " + String(temp_exterior) + " °C\n";
-			respuesta += "Humedad del suelo exterior: " + String(humedad_suelo_exterior) + " u\n";
+			respuesta += "Humedad del suelo exterior: " + String(humedad_suelo_exterior) + " %\n";
 			respuesta += "Humedad del aire exterior: " + String(humedad_aire_exterior) + " %\n";
 			respuesta += "\nPara ver gráficos históricos de los datos ingrese al link:\n";
 			respuesta += "https://thingspeak.com/channels/1937932";
@@ -130,16 +132,16 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 		else if (texto == "/hum")
 		{
 			respuesta = "El valor de humedad mínimo está configurado en: ";
-			respuesta += String(sequedad_suelo_max) + " u";
+			respuesta += String(humedad_suelo_min) + " %";
 			enviarMensaje(chat_id, respuesta);
 
-			respuesta = "Introduzca un nuevo valor (entero, de 1 a 4095)";
+			respuesta = "Introduzca un nuevo valor (entero, de 0 a 100)";
 			enviarMensaje(chat_id, respuesta);
 
-			if (evaluarMensajeInt(1, 4095, "u")) // setea respuesta_int y la respuesta adecuada
+			if (evaluarMensajeInt(0, 100, "%")) // setea respuesta_int y la respuesta adecuada
 			{
-				sequedad_suelo_max = respuesta_int;
-				escribirEEPROM(direccion[4], sequedad_suelo_max);
+				humedad_suelo_min = respuesta_int;
+				escribirEEPROM(direccion[4], humedad_suelo_min);
 			}
 		}
 
@@ -252,13 +254,10 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 			respuesta += String(temp_max_ventilacion) + " °C";
 			enviarMensaje(chat_id, respuesta);
 
-			respuesta = "Introduzca un nuevo valor (entre ";
-			respuesta += String(temp_min_alarma) + " y ";
-			respuesta += String(temp_max_alarma) + ") ";
-			respuesta += "entero, o si desea enviarlo con decimales, utilice punto (ej: 35.4)";
+			respuesta = "Introduzca un nuevo valor entero, o si desea enviarlo con decimales, utilice punto (ej: 35.4)";
 			enviarMensaje(chat_id, respuesta);
 
-			if (evaluarMensajeFloat(temp_min_alarma, temp_max_alarma, "°C")) // setea respuesta_int y la respuesta adecuada
+			if (evaluarMensajeFloat(-500.0F, 500.0F, "°C")) // setea respuesta_int y la respuesta adecuada
 			{
 				temp_max_ventilacion = respuesta_float;
 				escribirEEPROM(direccion[3], temp_max_ventilacion);
@@ -269,15 +268,17 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 		{
 			ventilacion_forzada = !ventilacion_forzada;
 			ventilando = !ventilando;
-			ventilando ? acivarVentilacion() : desactivarVentilacion();
+			ventilando ? activarVentilacion() : desactivarVentilacion();
 
 			respuesta = "La ventilación está ahora ";
 			ventilando ? (respuesta += "activada") : (respuesta += "desactivada");
+			respuesta += " (y en modo ";
+			ventilacion_forzada ? (respuesta += "forzado)") : (respuesta += "automático)");
 		}
 
 		else // si el texto no empieza con "/"
 		{
-			if (!respondiendo_grupo){
+			if (!respondiendo_grupo) {
 				respuesta = "El comando no es válido. Envíe /start para verlos";
 			}
 		}
@@ -313,17 +314,19 @@ bool evaluarMensajeInt(uint16_t Avalor_min, uint16_t Avalor_max, String Aunidad)
 			respuesta += String(respuesta_int);
 			respuesta += " ";
 			respuesta += Aunidad;
-			respuesta += "\n\nEl valor se cambió exitosamente";
+			respuesta += ".\n\nEl valor se cambió exitosamente";
 			return true; // devuelve siempre false, excepto que el número sea perfecto
 		}
 		else
 		{
-			respuesta = "El número ingresado no es válido. El valor no cambió";
+			respuesta = "El número ingresado no es válido. El valor no cambió.\n";
+			respuesta += "Intente revisar los límites máximos y/o mínimos del valor (si los hubiera).";
 		}
 	}
 	else // si no llegó un mensaje
 	{
-		respuesta = "No se introdujo un número. El valor no cambió";
+		respuesta = "No se introdujo un número. El valor no cambió.\n";
+		respuesta += "Cuando realiza un cambio, tiene 10 segundos para introducir su nuevo valor";
 	}
 
 	return false;
@@ -347,17 +350,19 @@ bool evaluarMensajeFloat(float Avalor_min, float Avalor_max, String Aunidad)
 			respuesta += String(respuesta_float);
 			respuesta += " ";
 			respuesta += Aunidad;
-			respuesta += "\n\nEl valor se cambió exitosamente";
+			respuesta += ".\n\nEl valor se cambió exitosamente";
 			return true; // devuelve siempre false, excepto que el número sea perfecto
 		}
 		else
 		{
-			respuesta = "El número ingresado no es válido. El valor no cambió";
+			respuesta = "El número ingresado no es válido. El valor no cambió.\n";
+			respuesta += "Intente revisar los límites máximos y/o mínimos del valor (si los hubiera).";
 		}
 	}
 	else // si no llegó un mensaje
 	{
-		respuesta = "No se introdujo un número. El valor no cambió";
+		respuesta = "No se introdujo un número. El valor no cambió.\n";
+		respuesta += "Cuando realiza un cambio, tiene 10 segundos para introducir su nuevo valor";
 	}
 
 	return false;
@@ -390,8 +395,8 @@ String obtenerInfo() // en "chequearMensajesRecibidosTelegram()"
 
 	msj_FS += "\nParámetros:\n"; // PARÁMETROS
 	msj_FS += "-Humedad mínima del suelo: ";
-	msj_FS += String(sequedad_suelo_max);
-	msj_FS += " u.\n";
+	msj_FS += String(humedad_suelo_min);
+	msj_FS += " %.\n";
 
 	msj_FS += "-Lapso de envío de alarmas: ";
 	int lapso_alarma_horas = lapso_alarma_mins / 60;

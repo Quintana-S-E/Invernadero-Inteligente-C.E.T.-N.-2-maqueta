@@ -83,7 +83,8 @@ void displayHum() // en "displayLecturas()"
 	Display.print("Humedades del suelo: ");
 	Display.setTextSize(2);
 	Display.setCursor(0, 45);
-	Display.print(String(humedad_suelo_interior) + "  " + String(humedad_suelo_exterior));
+	Display.print(String(humedad_suelo_interior) + " %  ");
+	Display.print(String(humedad_suelo_exterior) + " %");
 
 	Display.display();
 }

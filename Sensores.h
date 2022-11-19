@@ -61,7 +61,7 @@ void leerSoilInteriores() // en leerSensores()
 		humedad_suelo_interior_sum += humedad_suelo_interior_raw[i];
 	}
 	humedad_suelo_interior = (humedad_suelo_interior_sum / MUESTRAS_HUMEDAD_SUELO);
-	// humedad_suelo_interior_perc = map(humedad_suelo_interior, 0, 4095, 0, 100);
+	humedad_suelo_interior = map(humedad_suelo_interior, 0, 4095, 100, 0);
 }
 
 //==================================================================================================================//
@@ -93,7 +93,7 @@ void leerSoilExteriores() // en leerSensores()
 		humedad_suelo_exterior_sum += humedad_suelo_exterior_raw[i];
 	}
 	humedad_suelo_exterior = (humedad_suelo_exterior_sum / MUESTRAS_HUMEDAD_SUELO);
-	// humedad_suelo_exterior = map(humedad_suelo_exterior, 0, 4095, 0, 100);
+	humedad_suelo_exterior = map(humedad_suelo_exterior, 0, 4095, 100, 0);
 }
 
 
