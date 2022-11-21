@@ -56,6 +56,7 @@ void setup()
 	{
 		imprimirln("No se encuentra red WIFI.");
 		displayErrorWIFI();
+		while (1) ;
 	}
 
 	// conectar el bot a Telegram
