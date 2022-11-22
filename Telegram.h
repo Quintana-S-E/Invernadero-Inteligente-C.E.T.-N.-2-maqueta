@@ -276,10 +276,20 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 			ventilacion_forzada ? (respuesta += "forzado)") : (respuesta += "automático)");
 		}
 
-		else // si el texto no empieza con "/"
+		else if (texto == "/uwu")
+		{
+			respuesta = "Gracias";
+		}
+
+		else if (texto.charAt(0) == '/') // si solamente empieza por "/"
+		{
+			respuesta = "El comando enviado no es válido. Envíe /start para ver las opciones";
+		}
+
+		else // si el texto no es comando ni empieza con "/"
 		{
 			if (!respondiendo_grupo) {
-				respuesta = "El comando no es válido. Envíe /start para verlos";
+				respuesta = "No ha enviado un comando. Envíe /start para ver las opciones";
 			}
 		}
 
@@ -447,11 +457,13 @@ void chequearAlarma() // en "loop()"
 		mensaje = "ALARMA: ";
 
 		// evaluamos la temperatura
-		if (temp_interior_promedio >= temp_max_alarma) {
+		if (temp_interior_promedio >= temp_max_alarma)
+		{
 			mensaje += "La temperatura del invernadero es excesivamente alta";
 			enviarMensaje(chat_id, mensaje);
 		}
-		else if (temp_interior_promedio <= temp_min_alarma) {
+		else if (temp_interior_promedio <= temp_min_alarma)
+		{
 			mensaje += "La temperatura del invernadero es excesivamente baja";
 			enviarMensaje(chat_id, mensaje);
 		}
