@@ -1,13 +1,12 @@
 #ifndef Graficos_h
 #define Graficos_h
-#include <ThingSpeak.h>
 #include "Declaraciones.h"
 #include "Claves.h"
 
 void actualizarGraficos()
 {
     // hay que actualizar cada 15 segundos máx, porque si no el sitio no responde
-    if (millis() - ultima_vez_thingspeak >= 16000)
+    if (millis() - ultima_vez_thingspeak >= 20000UL)
 	{
 		ultima_vez_thingspeak = millis();
 

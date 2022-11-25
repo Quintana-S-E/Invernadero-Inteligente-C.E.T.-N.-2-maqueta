@@ -8,6 +8,7 @@
 #include <CTBot.h>
 #include <DHT.h>
 #include <ESP32Servo.h>
+#include <ThingSpeak.h>
 #include <Wire.h> // I2C
 #include <WiFi.h> // Gráficos.h
 
@@ -24,11 +25,11 @@
 #define DELAY_ACTIVIDAD_INVERNADERO 0UL // (ms) tiempo de espera para el loop del invernadero
 #define DELAY_CAMBIO_DISPLAY 10000UL
 #define DELAY_ACTUALIZACION_DISPLAY 500UL
+#define DELAY_COMPROBACION_WIFI 60000UL // cada un minuto comprueba la conexión a WiFi
 #define SCREEN_WIDTH 128			  // ancho del display OLED display, en píxeles
 #define SCREEN_HEIGHT 64			  // alto del display OLED display, en píxeles
 #define ANGULO_APERTURA 90			  // posición de apertura de la ventana
 #define ANGULO_CERRADO 0			  // posición de cerrado de la ventana
-#define TEMP_CIERRE_VENTILACION 22.0F // temperatura a la cual se cierra la ventana (en modo no forzado)
 #define MUESTRAS_HUMEDAD_SUELO 16	  // 16 máximo
 
 // Pines de salida
@@ -76,6 +77,7 @@ unsigned long ultima_vez_display_actualizo = 0;
 unsigned long ultima_vez_thingspeak = 0;
 unsigned long ultima_vez_bomba = 0;
 unsigned long ultima_vez_alarma = 0;
+unsigned long ultima_vez_WIFI = 0;
 
 // Flags de estado
 bool ventilacion_forzada = false; // si el estado de ventilación está siendo forzado por telegram
@@ -122,9 +124,11 @@ void leerSoilExteriores();
 void chequearMensajesRecibidosTelegram();
 void enviarMensaje(uint64_t Aid, String Amensaje);
 void chequearAlarma();
+void conectarWIFI(bool parar_programa);
+void chequearConexion();
 bool evaluarMensajeInt(uint16_t Avalor_min, uint16_t Avalor_max, String Aunidad);
 bool evaluarMensajeFloat(float Avalor_min, float Avalor_max, String Aunidad);
-bool conectarWIFI(String Assid, String Apassword);
+bool conectarWIFICon(String Assid, String Apassword);
 String obtenerInfo();
 
 // Control.h

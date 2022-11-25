@@ -18,6 +18,7 @@ void inicializarDisplay() // en "setup()"
 
 void displayConectandoWIFI() // en "setup()"
 {
+	Display.clearDisplay();
 	Display.setTextSize(2);
 	Display.setCursor(0, 0);
 	Display.print("Conectando\na WIFI...");
@@ -37,7 +38,7 @@ void displayErrorWIFI() // en "setup()"
 
 //==================================================================================================================//
 
-void displayConexionWIFI(String Amensaje_conectado_a, String Assid_conectada) // en "conectarWIFI()"
+void displayConexionWIFI(String Amensaje_conectado_a, String Assid_conectada) // en "conectarWIFICon()"
 {
 	Display.clearDisplay();
 	Display.setTextSize(2);				// en grande:

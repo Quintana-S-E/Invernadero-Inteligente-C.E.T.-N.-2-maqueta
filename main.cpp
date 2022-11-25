@@ -43,27 +43,9 @@ void setup()
 	// inicializar display
 	inicializarDisplay();
 
-	// conectarse al Wi-Fi
+	// conectarse al Wi-Fi, conectarse al bot, e inicializar ThingSpeak
 	imprimirln("Conectando a WIFI...");
-	displayConectandoWIFI();
-
-	Bot.setMaxConnectionRetries(15);
-	bool status_WIFI = false;
-	if (!status_WIFI) status_WIFI = conectarWIFI(SSIDescuela, PASSWORDescuela); // conectar al WIFI de la escuela
-	if (!status_WIFI) status_WIFI = conectarWIFI(SSIDnoni, PASSWORDnoni); // si no se pudo, probar con el de noni
-	if (!status_WIFI) status_WIFI = conectarWIFI(SSIDsanti, PASSWORDsanti); // si no se pudo, probar con el de santi
-	if (!status_WIFI)
-	{
-		imprimirln("No se encuentra red WIFI.");
-		displayErrorWIFI();
-		while (1) ;
-	}
-
-	// conectar el bot a Telegram
-	Bot.setTelegramToken(BOT_TOKEN);
-
-	// inicializar ThingSpeak
-	ThingSpeak.begin(Cliente);
+	conectarWIFI(true);
 
 	// leer o escribir la EEPROM
 	chequearEEPROMProgramada();
@@ -84,6 +66,7 @@ void loop()
 		leerSensores();
 
 		// Manejar Telegram
+		chequearConexion(); // rutina innecesaria según pruebas tempranas, pero es bueno tenerla
 		chequearMensajesRecibidosTelegram();
 		chequearAlarma();
 
@@ -94,7 +77,7 @@ void loop()
 		// Tomar decisiones
 		chequearVentilacion();
 		chequearRiego();
-		// chequear_iluminacion();
+		//chequear_iluminacion();
 
 		digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // parpadeamos el LED de la placa
 	}

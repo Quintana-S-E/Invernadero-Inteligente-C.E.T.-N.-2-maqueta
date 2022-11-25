@@ -1,5 +1,6 @@
 #ifndef Telegram_h
 #define Telegram_h
+#include "Claves.h"
 #include "Declaraciones.h"
 #include "Display.h"
 #include "EEPROM_manejo.h"
@@ -278,7 +279,7 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 
 		else if (texto == "/uwu")
 		{
-			respuesta = "Gracias";
+			respuesta = "Gracias 👉👈";
 		}
 
 		else if (texto.charAt(0) == '/') // si solamente empieza por "/"
@@ -289,7 +290,7 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 		else // si el texto no es comando ni empieza con "/"
 		{
 			if (!respondiendo_grupo) {
-				respuesta = "No ha enviado un comando. Envíe /start para ver las opciones";
+				respuesta = "No ha enviado un comando. Envíe\n/start para ver las opciones";
 			}
 		}
 
@@ -473,14 +474,61 @@ void chequearAlarma() // en "loop()"
 
 //==================================================================================================================//
 
-bool conectarWIFI(String Assid, String Apassword) // en "setup()"
+void chequearConexion()
+{
+	if (millis() - ultima_vez_WIFI >= DELAY_COMPROBACION_WIFI)
+	{
+		ultima_vez_WIFI = millis();
+
+		// si no hay conexión con el bot, se fue el WiFi
+		if (Bot.testConnection() != true)
+		{
+			// imprimir el error
+			imprimirln("Bot desconectado. Reconectando...");
+			// reconectar
+			conectarWIFI(false);
+		}
+	}
+}
+
+//==================================================================================================================//
+
+void conectarWIFI(bool parar_programa)
+{
+	displayConectandoWIFI();
+
+	Bot.setMaxConnectionRetries(15);
+	bool status_WIFI = false;
+	// probar con cada red (imprime y muestra en el display si se conectó)
+	if (!status_WIFI) status_WIFI = conectarWIFICon(SSIDescuela, PASSWORDescuela); // conectar al WIFI de la escuela
+	if (!status_WIFI) status_WIFI = conectarWIFICon(SSIDnoni, PASSWORDnoni); // si no se pudo, probar con el de noni
+	if (!status_WIFI) status_WIFI = conectarWIFICon(SSIDsanti, PASSWORDsanti); // si no se pudo, probar con el de santi
+	if (!status_WIFI)
+	{
+		imprimirln("No se encuentra red WIFI.");
+		displayErrorWIFI();
+		if (parar_programa) while (1) ;
+	}
+	else
+	{
+		// conectar el bot a Telegram
+		Bot.setTelegramToken(BOT_TOKEN);
+		// inicializar ThingSpeak
+		ThingSpeak.begin(Cliente);
+	}
+}
+
+//==================================================================================================================//
+
+bool conectarWIFICon(String Assid, String Apassword) // en "setup()"
 {
 	bool stat_WIFI;
 	String res_WIFI;
 	stat_WIFI = Bot.wifiConnect(Assid, Apassword);
 	res_WIFI = stat_WIFI ? "Conectado a la red:\n" : "No se pudo conectar a: ";
-	imprimirln(res_WIFI + String(Assid));
 
+	// imprimir el resultado de cada intento
+	imprimirln(res_WIFI + String(Assid));
 	// si se pudo conectar, imprimir un mensaje en el display (con el SSID conectado)
 	if (stat_WIFI) displayConexionWIFI(res_WIFI, Assid);
 
