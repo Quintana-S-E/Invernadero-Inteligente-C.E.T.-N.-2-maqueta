@@ -5,17 +5,17 @@
 
 // Variables y funciones de la EEPROM
 bool EEPROM_programada;				// 0.	para verificar si está programada o no la EEPROM
-float temp_max_alarma = 45.0F;		// 1.
-float temp_min_alarma = -5.0F;		// 2.
-float temp_max_ventilacion = 35.0F;	// 3.
-uint16_t humedad_suelo_min = 60;	// 4.	70 % es vaso de agua, 29 % es el aire
-uint16_t lapso_alarma_mins = 60;	// 5.	60 minutos (máx 65535 min o 1092 horas o 45 días)
+float temp_maxima_alarma = 45.0F;		// 1.
+float temp_minima_alarma = -5.0F;		// 2.
+float temp_maxima_ventilacion = 35.0F;	// 3.
+uint16_t humedad_suelo_minima = 60;	// 4.	70 % es vaso de agua, 29 % es el aire
+uint16_t lapso_alarma_minutos = 60;	// 5.	60 minutos (máx 65535 min o 1092 horas o 45 días)
 bool alarma_activada = true;		// 6.
-uint16_t tiempo_de_bomba_segs = 10;	// 7.	4 segundos (máx 65535 seg o 18,2 horas)
-uint16_t tiempo_espera_mins = 15;	// 8.	15 minutos (máx 65535 min)
+uint16_t tiempo_de_bomba_segundos = 10;	// 7.	4 segundos (máx 65535 seg o 18,2 horas)
+uint16_t tiempo_espera_minutos = 15;	// 8.	15 minutos (máx 65535 min)
 
 #define CANT_VARIABLES_EEPROM 9	// bool, float, float, float, int, int, bool, int, int
-int long_dato[CANT_VARIABLES_EEPROM] = {1, 4, 4, 4, 2, 2, 1, 2, 2};
+int longitud_dato_EEPROM[CANT_VARIABLES_EEPROM] = {1, 4, 4, 4, 2, 2, 1, 2, 2};
 int direccion[CANT_VARIABLES_EEPROM];
 int ESPACIOS_EEPROM;
 
@@ -24,10 +24,9 @@ void setDireccionesEEPROM() // en "setup()"
 	// hay que hacer EEPROM.put a las direcciones indicadas, según la longitud de los datos escritos anteriormente
 	int i;
 	direccion[0] = 0;
-	for (i = 1; i < CANT_VARIABLES_EEPROM; i++) {
-		direccion[i] = direccion[i - 1] + long_dato[i - 1];
-	}
-	ESPACIOS_EEPROM = direccion[i - 1] + long_dato[i - 1];
+	for (i = 1; i < CANT_VARIABLES_EEPROM; i++)
+		direccion[i] = direccion[i - 1] + longitud_dato_EEPROM[i - 1];
+	ESPACIOS_EEPROM = direccion[i - 1] + longitud_dato_EEPROM[i - 1];
 }
 
 //==================================================================================================================//
@@ -60,14 +59,14 @@ void chequearEEPROMProgramada() // en "setup()"
 void leerEEPROMProgramada() // en "setup()"
 {
 	EEPROM.begin(ESPACIOS_EEPROM);
-	EEPROM.get(direccion[1], temp_max_alarma);
-	EEPROM.get(direccion[2], temp_min_alarma);
-	EEPROM.get(direccion[3], temp_max_ventilacion);
-	EEPROM.get(direccion[4], humedad_suelo_min);
-	EEPROM.get(direccion[5], lapso_alarma_mins);
+	EEPROM.get(direccion[1], temp_maxima_alarma);
+	EEPROM.get(direccion[2], temp_minima_alarma);
+	EEPROM.get(direccion[3], temp_maxima_ventilacion);
+	EEPROM.get(direccion[4], humedad_suelo_minima);
+	EEPROM.get(direccion[5], lapso_alarma_minutos);
 	EEPROM.get(direccion[6], alarma_activada);
-	EEPROM.get(direccion[7], tiempo_de_bomba_segs);
-	EEPROM.get(direccion[8], tiempo_espera_mins);
+	EEPROM.get(direccion[7], tiempo_de_bomba_segundos);
+	EEPROM.get(direccion[8], tiempo_espera_minutos);
 	EEPROM.end();
 }
 
@@ -79,14 +78,14 @@ void cargarValoresPorDefecto() // en "setup()"
 	EEPROM.begin(ESPACIOS_EEPROM);
 	EEPROM_programada = true; // ahora va a estar programada
 	EEPROM.put(direccion[0], EEPROM_programada);
-	EEPROM.put(direccion[1], temp_max_alarma);
-	EEPROM.put(direccion[2], temp_min_alarma);
-	EEPROM.put(direccion[3], temp_max_ventilacion);
-	EEPROM.put(direccion[4], humedad_suelo_min);
-	EEPROM.put(direccion[5], lapso_alarma_mins);
+	EEPROM.put(direccion[1], temp_maxima_alarma);
+	EEPROM.put(direccion[2], temp_minima_alarma);
+	EEPROM.put(direccion[3], temp_maxima_ventilacion);
+	EEPROM.put(direccion[4], humedad_suelo_minima);
+	EEPROM.put(direccion[5], lapso_alarma_minutos);
 	EEPROM.put(direccion[6], alarma_activada);
-	EEPROM.put(direccion[7], tiempo_de_bomba_segs);
-	EEPROM.put(direccion[8], tiempo_espera_mins);
+	EEPROM.put(direccion[7], tiempo_de_bomba_segundos);
+	EEPROM.put(direccion[8], tiempo_espera_minutos);
 	EEPROM.commit(); // efectivamente escribimos los valores
 	EEPROM.end();
 }
@@ -120,14 +119,14 @@ void imprimirEEPROMValsDirsReads()
 	Serial.println();
 	Serial.println("Valores recuperados de la EEPROM:");
 	Serial.println(EEPROM_programada);
-	Serial.println(temp_max_alarma);
-	Serial.println(temp_min_alarma);
-	Serial.println(temp_max_ventilacion);
-	Serial.println(humedad_suelo_min);
-	Serial.println(lapso_alarma_mins);
+	Serial.println(temp_maxima_alarma);
+	Serial.println(temp_minima_alarma);
+	Serial.println(temp_maxima_ventilacion);
+	Serial.println(humedad_suelo_minima);
+	Serial.println(lapso_alarma_minutos);
 	Serial.println(alarma_activada);
-	Serial.println(tiempo_de_bomba_segs);
-	Serial.println(tiempo_espera_mins);
+	Serial.println(tiempo_de_bomba_segundos);
+	Serial.println(tiempo_espera_minutos);
 	Serial.println();
 
 	Serial.println("Valores de las direcciones:");
@@ -164,14 +163,14 @@ void setDireccionesEEPROM()
 	// hay que hacer .put a las direcciones indicadas, según la longitud de los datos escritos anteriormente
 	direccion[0] = 0;
 	direccion[1] = direccion[0] + 1;//bool EEPROM_programada
-	direccion[2] = direccion[1] + 4;//float	temp_max_alarma
-	direccion[3] = direccion[2] + 4;//float	temp_min_alarma
-	direccion[5] = direccion[3] + 4;//float	temp_max_ventilacion
-	direccion[6] = direccion[4] + 2;//int	humedad_suelo_min
-	direccion[7] = direccion[5] + 2;//int	lapso_alarma_mins
+	direccion[2] = direccion[1] + 4;//float	temp_maxima_alarma
+	direccion[3] = direccion[2] + 4;//float	temp_minima_alarma
+	direccion[5] = direccion[3] + 4;//float	temp_maxima_ventilacion
+	direccion[6] = direccion[4] + 2;//int	humedad_suelo_minima
+	direccion[7] = direccion[5] + 2;//int	lapso_alarma_minutos
 	direccion[8] = direccion[6] + 1;//bool	alarma_activada
-	direccion[9] = direccion[7] + 2;//int	tiempo_de_bomba_segs
- ESPACIOS_EEPROM = direccion[8] + 2;//int	tiempo_espera_mins
+	direccion[9] = direccion[7] + 2;//int	tiempo_de_bomba_segundos
+ ESPACIOS_EEPROM = direccion[8] + 2;//int	tiempo_espera_minutos
 }
 */
 

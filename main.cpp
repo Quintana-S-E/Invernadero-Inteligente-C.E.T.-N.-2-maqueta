@@ -25,6 +25,7 @@ void setup()
 	pinMode(PIN_VENTILADOR, OUTPUT);
 	digitalWrite(PIN_BOMBA, HIGH);
 	digitalWrite(PIN_VENTILADOR, HIGH);
+	// ver, para el futuro https://forum.arduino.cc/t/digitalwritefast-digitalreadfast-pinmodefast-etc/47037
 
 	// inicializar servo
 		ESP32PWM::allocateTimer(0);

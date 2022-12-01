@@ -74,17 +74,17 @@ DHT DhtExterior(DHT_EXT_PIN, DHT22);
 unsigned long ultima_vez_invernadero_funciono = 0;
 unsigned long ultima_vez_display_cambio = 0;
 unsigned long ultima_vez_display_actualizo = 0;
-unsigned long ultima_vez_thingspeak = 0;
-unsigned long ultima_vez_bomba = 0;
-unsigned long ultima_vez_alarma = 0;
-unsigned long ultima_vez_WIFI = 0;
+unsigned long ultima_vez_thingspeak_actualizo = 0;
+unsigned long ultima_vez_bomba_encendio = 0;
+unsigned long ultima_vez_alarma_funciono = 0;
+unsigned long ultima_vez_comprobacion_WIFI = 0;
 
 // Flags de estado
 bool ventilacion_forzada = false; // si el estado de ventilación está siendo forzado por telegram
 bool ventilando = false;
 bool esperando_riego = false;   // para chequearRiego()
 bool mostrando_humedad = false; // para cambiar lo que se muestra en el display (humedad y temperatura)
-bool primer_mensaje = true;	   // para chequearMensajesRecibidosTelegram() (CAMBIAR A LA EEPROM)
+bool telegram_primer_mensaje = true;	   // para chequearMensajesRecibidosTelegram() (CAMBIAR A LA EEPROM)
 
 // Datos de los sensores
 float temp_interior_promedio; // DHTs interiores
@@ -96,11 +96,11 @@ float humedad_aire_exterior;
 int humedad_suelo_interior; // soil moisture sensors
 int humedad_suelo_exterior;
 
-// Otras variables
-String respuesta;		// necesariamente global para cambiarla en evaluarMensajeFloat() y evaluarMensajeInt()
-float respuesta_float;	// cuando preguntamos por un número con decimal de entrada
-uint16_t respuesta_int;	// cuando preguntamos por un número entero de entrada
-uint64_t chat_id = 0;	// comienza en 0 para comprobaciones en chequearAlarma()
+// Variables de telegram
+String telegram_respuesta;		// necesariamente global para cambiarla en evaluarMensajeFloat() y evaluarMensajeInt()
+float telegram_respuesta_float;	// cuando preguntamos por un número con decimal de entrada
+uint16_t telegram_respuesta_int;	// cuando preguntamos por un número entero de entrada
+uint64_t telegram_chat_id = 0;	// comienza en 0 para comprobaciones en chequearAlarma()
 
 // EEMPROM_manejo.h
 void chequearEEPROMProgramada();

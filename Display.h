@@ -52,7 +52,7 @@ void displayConexionWIFI(String Amensaje_conectado_a, String Assid_conectada) //
 
 //==================================================================================================================//
 
-// sólo actualizamos los números del display cada cierto tiempo (numbers flicker)
+// sólo actualizamos los números del display cada cierto tiempo (porque si no los números parpadean)
 void displayLecturas(bool Amostrando_humedad) // en "loop()"
 {
 	if (millis() - ultima_vez_display_actualizo >= DELAY_ACTUALIZACION_DISPLAY)

@@ -6,14 +6,15 @@
 // Abrir la ventilación y activar ventiladores
 void chequearVentilacion() // en "loop()"
 {
-	if (ventilacion_forzada) return; // si la ventilación es forzada por telegram, ignorar lo automático
+	if (ventilacion_forzada)
+		return; // si la ventilación es forzada por telegram, ignorar lo automático
 
-	if (temp_exterior >= temp_max_ventilacion && !ventilando)
+	if (temp_exterior >= temp_maxima_ventilacion && !ventilando)
 	{
 		ventilando = true;
 		activarVentilacion();
 	}
-	else if (temp_exterior < temp_max_ventilacion && ventilando) // VER BIEN ESTO
+	else if (temp_exterior < temp_maxima_ventilacion && ventilando) // VER BIEN ESTO
 	{
 		ventilando = false;
 		desactivarVentilacion();
@@ -26,14 +27,13 @@ void chequearVentilacion() // en "loop()"
 void chequearRiego() // en "loop()"
 {
 	// apagar la bomba después del tiempo definido
-	if (millis() - ultima_vez_bomba >= (tiempo_de_bomba_segs * 1000UL)) {
+	if (millis() - ultima_vez_bomba_encendio >= (tiempo_de_bomba_segundos * 1000UL))
 		digitalWrite(PIN_BOMBA, HIGH);
-	}
 
-	// si se está esperando, comprobar si pasó el tiempo desde ultima_vez_bomba. De ser así, dejar de esperar
+	// si se está esperando, comprobar si pasó el tiempo desde ultima_vez_bomba_encendio. De ser así, dejar de esperar
 	if (esperando_riego)
 	{
-		if (millis() - ultima_vez_bomba >= (tiempo_espera_mins * 60000UL))
+		if (millis() - ultima_vez_bomba_encendio >= (tiempo_espera_minutos * 60000UL))
 		{
 			esperando_riego = false;
 			imprimirln("La espera desde el riego finalizó");
@@ -41,11 +41,11 @@ void chequearRiego() // en "loop()"
 	}
 
 	// chequear la humedad y regar (si no se está esperando la filtración del agua)
-	if (humedad_suelo_exterior <= humedad_suelo_min && !esperando_riego)
+	if (humedad_suelo_exterior <= humedad_suelo_minima && !esperando_riego)
 	{
-		ultima_vez_bomba = millis();
+		ultima_vez_bomba_encendio = millis();
 		digitalWrite(PIN_BOMBA, LOW);
-		esperando_riego = true; // hay que esperar desde el tiempo 0 (ultima_vez_bomba)
+		esperando_riego = true; // hay que esperar desde el tiempo 0 (ultima_vez_bomba_encendio)
 	}
 }
 

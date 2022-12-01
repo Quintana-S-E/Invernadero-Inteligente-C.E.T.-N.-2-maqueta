@@ -38,12 +38,11 @@ void leerDHT22Interiores() // en leerSensores()
 
 	// mirar si alguna lectura falló y finalizar antes (para empezar de nuevo).
 	/*
-	if (isnan(humedad_aire_interior[0]) || isnan(temp_interior[0])) {
+	if (isnan(humedad_aire_interior[0]) || isnan(temp_interior[0]))
 		imprimirln("Fallo al leer el DHT22 interior bajo");
-	}
-	if (isnan(humedad_aire_interior[1]) || isnan(temp_interior[1])) {
+	if (isnan(humedad_aire_interior[1]) || isnan(temp_interior[1]))
 		imprimirln("Fallo al leer el DHT22 interior alto");
-	}*/
+	*/
 
 	humedad_aire_interior_promedio = (humedad_aire_interior[0] + humedad_aire_interior[1]) / 2;
 	temp_interior_promedio = (temp_interior[0] + temp_interior[1]) / 2;
@@ -74,9 +73,9 @@ void leerDHT22Exteriores() // en leerSensores()
 
 	// mirar si alguna lectura falló y finalizar antes (para empezar de nuevo).
 	/*
-	if (isnan(humedad_aire_exterior) || isnan(temp_exterior)) {
+	if (isnan(humedad_aire_exterior) || isnan(temp_exterior))
 		imprimirln("Fallo al leer el DHT22 exterior");
-	}*/
+	*/
 	
 	// con más sensores exteriores aquí haríamos el promedio
 }
