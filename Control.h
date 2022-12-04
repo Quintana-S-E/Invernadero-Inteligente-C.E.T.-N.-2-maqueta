@@ -27,7 +27,7 @@ void chequearVentilacion() // en "loop()"
 void chequearRiego() // en "loop()"
 {
 	// apagar la bomba después del tiempo definido
-	if (millis() - ultima_vez_bomba_encendio >= (tiempo_de_bomba_segundos * 1000UL))
+	if (millis() - ultima_vez_bomba_encendio >= (tiempo_bombeo_segundos * 1000UL))
 		digitalWrite(PIN_BOMBA, HIGH);
 
 	// si se está esperando, comprobar si pasó el tiempo desde ultima_vez_bomba_encendio. De ser así, dejar de esperar

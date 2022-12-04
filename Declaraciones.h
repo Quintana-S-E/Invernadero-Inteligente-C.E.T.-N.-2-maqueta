@@ -12,6 +12,37 @@
 #include <Wire.h> // I2C
 #include <WiFi.h> // Gráficos.h
 
+// Clase InteraccionTelegram (todo lo del bot que no sea WiFi)
+class InteraccionTelegram {
+	public:
+		// Variables
+		String		respuesta; // necesariamente global para cambiarla en evaluarMensajeFloat() y evaluarMensajeInt()
+		float		numero_entrada_float;	// cuando preguntamos por un número con decimal de entrada
+		uint16_t 	numero_entrada_int;		// cuando preguntamos por un número entero de entrada
+		uint64_t 	id = 0; // comienza en 0 para comprobaciones en chequearAlarma()
+
+		// Funciones
+		void enviarMensaje(uint64_t Aid, String Amensaje);
+		bool evaluarMensajeInt(uint16_t Avalor_min, uint16_t Avalor_max, String Aunidad);
+		bool evaluarMensajeFloat(float Avalor_min, float Avalor_max, String Aunidad);
+		// comandos
+		void comandoStart();
+		void comandoLecturas();
+		void comandoInfo();
+		void comandoProg();
+		void comandoVentilar();
+		void comandoTiempoAl();
+		void comandoTiempoRiego();
+		void comandoTiempoEspera();
+		void comandoTmax();
+		void comandoTmin();
+		void comandoTvent();
+		void comandoAlarma();
+		void comandoHum();
+		void comandoLed();
+		void comandoReprog();
+};
+
 //#define DEBUGserial // Comentar para eliminar los Serial.print
 #ifdef DEBUGserial
 	#define imprimir(x) Serial.print(x)
@@ -20,6 +51,16 @@
 	#define imprimir(x)
 	#define imprimirln(x)
 #endif
+
+// valores por defecto de la EEPROM
+#define TEMP_MAXIMA_ALARMA_DEFECTO 45.0F
+#define TEMP_MINIMA_ALARMA_DEFECTO -5.0F
+#define TEMP_MAXIMA_VENTILACION_DEFECTO 35.0F
+#define HUMEDAD_SUELO_MINIMA_DEFECTO 60
+#define LAPSO_ALARMA_MINUTOS_DEFECTO 60
+#define ALARMA_ACTIVADA_DEFECTO true
+#define TIEMPO_BOMBEO_SEGUNDOS_DEFECTO 10
+#define TIEMPO_ESPERA_MINUTOS_DEFECTO 15
 
 // Otras constantes de funcionamiento
 #define DELAY_ACTIVIDAD_INVERNADERO 0UL // (ms) tiempo de espera para el loop del invernadero
@@ -64,6 +105,7 @@
 CTBot Bot;
 Servo Ventana;
 WiFiClient Cliente;
+InteraccionTelegram CT; // Chat Telegram (todo lo del bot que no sea WiFi)
 Adafruit_SSD1306 Display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 DHT DhtInteriorLow(DHT_INT_LOW_PIN, DHT22);
 DHT DhtInteriorHigh(DHT_INT_HIGH_PIN, DHT22);
@@ -96,12 +138,6 @@ float humedad_aire_exterior;
 int humedad_suelo_interior; // soil moisture sensors
 int humedad_suelo_exterior;
 
-// Variables de telegram
-String telegram_respuesta;		// necesariamente global para cambiarla en evaluarMensajeFloat() y evaluarMensajeInt()
-float telegram_respuesta_float;	// cuando preguntamos por un número con decimal de entrada
-uint16_t telegram_respuesta_int;	// cuando preguntamos por un número entero de entrada
-uint64_t telegram_chat_id = 0;	// comienza en 0 para comprobaciones en chequearAlarma()
-
 // EEMPROM_manejo.h
 void chequearEEPROMProgramada();
 void setDireccionesEEPROM();
@@ -122,14 +158,10 @@ void leerSoilExteriores();
 
 // Telegram.h
 void chequearMensajesRecibidosTelegram();
-void enviarMensaje(uint64_t Aid, String Amensaje);
 void chequearAlarma();
 void conectarWIFI(bool parar_programa);
-void chequearConexion();
-bool evaluarMensajeInt(uint16_t Avalor_min, uint16_t Avalor_max, String Aunidad);
-bool evaluarMensajeFloat(float Avalor_min, float Avalor_max, String Aunidad);
 bool conectarWIFICon(String Assid, String Apassword);
-String obtenerInfo();
+void chequearConexion();
 
 // Control.h
 void chequearVentilacion();

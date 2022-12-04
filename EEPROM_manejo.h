@@ -4,18 +4,18 @@
 #include "Declaraciones.h"
 
 // Variables y funciones de la EEPROM
-bool EEPROM_programada;				// 0.	para verificar si está programada o no la EEPROM
-float temp_maxima_alarma = 45.0F;		// 1.
-float temp_minima_alarma = -5.0F;		// 2.
-float temp_maxima_ventilacion = 35.0F;	// 3.
-uint16_t humedad_suelo_minima = 60;	// 4.	70 % es vaso de agua, 29 % es el aire
-uint16_t lapso_alarma_minutos = 60;	// 5.	60 minutos (máx 65535 min o 1092 horas o 45 días)
-bool alarma_activada = true;		// 6.
-uint16_t tiempo_de_bomba_segundos = 10;	// 7.	4 segundos (máx 65535 seg o 18,2 horas)
-uint16_t tiempo_espera_minutos = 15;	// 8.	15 minutos (máx 65535 min)
+bool		EEPROM_programada;			// 0.	para verificar si está programada o no la EEPROM
+float		temp_maxima_alarma;			// 1.
+float		temp_minima_alarma;			// 2.
+float		temp_maxima_ventilacion;	// 3.
+uint8_t		humedad_suelo_minima;		// 4.	70 % es vaso de agua, 29 % es el aire
+uint16_t	lapso_alarma_minutos;		// 5.	60 minutos (máx 65535 min o 1092 horas o 45 días)
+bool		alarma_activada;			// 6.
+uint16_t	tiempo_bombeo_segundos;		// 7.	4 segundos (máx 65535 seg o 18,2 horas)
+uint16_t	tiempo_espera_minutos;		// 8.	15 minutos (máx 65535 min)
 
 #define CANT_VARIABLES_EEPROM 9	// bool, float, float, float, int, int, bool, int, int
-int longitud_dato_EEPROM[CANT_VARIABLES_EEPROM] = {1, 4, 4, 4, 2, 2, 1, 2, 2};
+int longitud_dato_EEPROM[CANT_VARIABLES_EEPROM] = {1, 4, 4, 4, 1, 2, 1, 2, 2};
 int direccion[CANT_VARIABLES_EEPROM];
 int ESPACIOS_EEPROM;
 
@@ -49,9 +49,9 @@ void chequearEEPROMProgramada() // en "setup()"
 		cargarValoresPorDefecto();
 	}
 
-	#ifdef DEBUGserial
-		imprimirEEPROMValsDirsReads();
-	#endif
+#ifdef DEBUGserial
+	imprimirEEPROMValsDirsReads();
+#endif
 }
 
 //==================================================================================================================//
@@ -65,7 +65,7 @@ void leerEEPROMProgramada() // en "setup()"
 	EEPROM.get(direccion[4], humedad_suelo_minima);
 	EEPROM.get(direccion[5], lapso_alarma_minutos);
 	EEPROM.get(direccion[6], alarma_activada);
-	EEPROM.get(direccion[7], tiempo_de_bomba_segundos);
+	EEPROM.get(direccion[7], tiempo_bombeo_segundos);
 	EEPROM.get(direccion[8], tiempo_espera_minutos);
 	EEPROM.end();
 }
@@ -75,8 +75,17 @@ void leerEEPROMProgramada() // en "setup()"
 // poner los valores por defecto en la EEPROM
 void cargarValoresPorDefecto() // en "setup()"
 {
-	EEPROM.begin(ESPACIOS_EEPROM);
 	EEPROM_programada = true; // ahora va a estar programada
+	temp_maxima_alarma = TEMP_MAXIMA_ALARMA_DEFECTO;
+	temp_minima_alarma = TEMP_MINIMA_ALARMA_DEFECTO;
+	temp_maxima_ventilacion = TEMP_MAXIMA_VENTILACION_DEFECTO;
+	humedad_suelo_minima = HUMEDAD_SUELO_MINIMA_DEFECTO;
+	lapso_alarma_minutos = LAPSO_ALARMA_MINUTOS_DEFECTO;
+	alarma_activada = ALARMA_ACTIVADA_DEFECTO;
+	tiempo_bombeo_segundos = TIEMPO_BOMBEO_SEGUNDOS_DEFECTO;
+	tiempo_espera_minutos = TIEMPO_ESPERA_MINUTOS_DEFECTO;
+
+	EEPROM.begin(ESPACIOS_EEPROM);
 	EEPROM.put(direccion[0], EEPROM_programada);
 	EEPROM.put(direccion[1], temp_maxima_alarma);
 	EEPROM.put(direccion[2], temp_minima_alarma);
@@ -84,7 +93,7 @@ void cargarValoresPorDefecto() // en "setup()"
 	EEPROM.put(direccion[4], humedad_suelo_minima);
 	EEPROM.put(direccion[5], lapso_alarma_minutos);
 	EEPROM.put(direccion[6], alarma_activada);
-	EEPROM.put(direccion[7], tiempo_de_bomba_segundos);
+	EEPROM.put(direccion[7], tiempo_bombeo_segundos);
 	EEPROM.put(direccion[8], tiempo_espera_minutos);
 	EEPROM.commit(); // efectivamente escribimos los valores
 	EEPROM.end();
@@ -125,7 +134,7 @@ void imprimirEEPROMValsDirsReads()
 	Serial.println(humedad_suelo_minima);
 	Serial.println(lapso_alarma_minutos);
 	Serial.println(alarma_activada);
-	Serial.println(tiempo_de_bomba_segundos);
+	Serial.println(tiempo_bombeo_segundos);
 	Serial.println(tiempo_espera_minutos);
 	Serial.println();
 
@@ -169,7 +178,7 @@ void setDireccionesEEPROM()
 	direccion[6] = direccion[4] + 2;//int	humedad_suelo_minima
 	direccion[7] = direccion[5] + 2;//int	lapso_alarma_minutos
 	direccion[8] = direccion[6] + 1;//bool	alarma_activada
-	direccion[9] = direccion[7] + 2;//int	tiempo_de_bomba_segundos
+	direccion[9] = direccion[7] + 2;//int	tiempo_bombeo_segundos
  ESPACIOS_EEPROM = direccion[8] + 2;//int	tiempo_espera_minutos
 }
 */
