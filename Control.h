@@ -14,7 +14,7 @@ void chequearVentilacion() // en "loop()"
 		ventilando = true;
 		activarVentilacion();
 	}
-	else if (temp_exterior < temp_maxima_ventilacion && ventilando) // VER BIEN ESTO
+	else if (temp_exterior < temp_maxima_ventilacion && ventilando)
 	{
 		ventilando = false;
 		desactivarVentilacion();

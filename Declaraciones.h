@@ -12,37 +12,6 @@
 #include <Wire.h> // I2C
 #include <WiFi.h> // Gráficos.h
 
-// Clase InteraccionTelegram (todo lo del bot que no sea WiFi)
-class InteraccionTelegram {
-	public:
-		// Variables
-		String		respuesta; // necesariamente global para cambiarla en evaluarMensajeFloat() y evaluarMensajeInt()
-		float		numero_entrada_float;	// cuando preguntamos por un número con decimal de entrada
-		uint16_t 	numero_entrada_int;		// cuando preguntamos por un número entero de entrada
-		uint64_t 	id = 0; // comienza en 0 para comprobaciones en chequearAlarma()
-
-		// Funciones
-		void enviarMensaje(uint64_t Aid, String Amensaje);
-		bool evaluarMensajeInt(uint16_t Avalor_min, uint16_t Avalor_max, String Aunidad);
-		bool evaluarMensajeFloat(float Avalor_min, float Avalor_max, String Aunidad);
-		// comandos
-		void comandoStart();
-		void comandoLecturas();
-		void comandoInfo();
-		void comandoProg();
-		void comandoVentilar();
-		void comandoTiempoAl();
-		void comandoTiempoRiego();
-		void comandoTiempoEspera();
-		void comandoTmax();
-		void comandoTmin();
-		void comandoTvent();
-		void comandoAlarma();
-		void comandoHum();
-		void comandoLed();
-		void comandoReprog();
-};
-
 //#define DEBUGserial // Comentar para eliminar los Serial.print
 #ifdef DEBUGserial
 	#define imprimir(x) Serial.print(x)
@@ -105,7 +74,6 @@ class InteraccionTelegram {
 CTBot Bot;
 Servo Ventana;
 WiFiClient Cliente;
-InteraccionTelegram CT; // Chat Telegram (todo lo del bot que no sea WiFi)
 Adafruit_SSD1306 Display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 DHT DhtInteriorLow(DHT_INT_LOW_PIN, DHT22);
 DHT DhtInteriorHigh(DHT_INT_HIGH_PIN, DHT22);
@@ -122,20 +90,20 @@ unsigned long ultima_vez_alarma_funciono = 0;
 unsigned long ultima_vez_comprobacion_WIFI = 0;
 
 // Flags de estado
-bool ventilacion_forzada = false; // si el estado de ventilación está siendo forzado por telegram
-bool ventilando = false;
-bool esperando_riego = false;   // para chequearRiego()
-bool mostrando_humedad = false; // para cambiar lo que se muestra en el display (humedad y temperatura)
-bool telegram_primer_mensaje = true;	   // para chequearMensajesRecibidosTelegram() (CAMBIAR A LA EEPROM)
+bool ventilacion_forzada	= false; // si el estado de ventilación está siendo forzado por telegram
+bool ventilando				= false;
+bool esperando_riego		= false; // para chequearRiego()
+bool mostrando_humedad		= false; // para cambiar lo que se muestra en el display (humedad y temperatura)
 
 // Datos de los sensores
-float temp_interior_promedio; // DHTs interiores
+// DHTs interiores
+float temp_interior_promedio;
 float humedad_aire_interior_promedio;
-
-float temp_exterior; // DHTs exteriores
+// DHTs exteriores
+float temp_exterior;
 float humedad_aire_exterior;
-
-int humedad_suelo_interior; // soil moisture sensors
+// soil moisture sensors
+int humedad_suelo_interior;
 int humedad_suelo_exterior;
 
 // EEMPROM_manejo.h
@@ -155,13 +123,6 @@ void leerDHT22Interiores();
 void leerSoilInteriores();
 void leerDHT22Exteriores();
 void leerSoilExteriores();
-
-// Telegram.h
-void chequearMensajesRecibidosTelegram();
-void chequearAlarma();
-void conectarWIFI(bool parar_programa);
-bool conectarWIFICon(String Assid, String Apassword);
-void chequearConexion();
 
 // Control.h
 void chequearVentilacion();
@@ -183,6 +144,40 @@ void displayTemp();
 
 // Graficos.h
 void actualizarGraficos();
+
+// Telegram.h
+// variables
+String		chat_rpta; // necesariamente global para cambiarla en evaluarMensajeFloat() y evaluarMensajeInt()
+uint64_t 	chat_id = 0; // comienza en 0 para comprobaciones en chequearAlarma()
+uint16_t 	chat_numero_entrada_int;	// cuando preguntamos por un número entero de entrada
+float		chat_numero_entrada_float;	// cuando preguntamos por un número con decimal de entrada
+bool		chat_primer_mensaje = true; // para chequearMensajesRecibidosTelegram()
+// WiFi
+void conectarWIFI(bool parar_programa);
+bool conectarWIFICon(String Assid, String Apassword);
+void chequearConexion();
+// funciones varias
+void chequearMensajesRecibidosTelegram();
+void chequearAlarma();
+void enviarMensaje(uint64_t Aid, String Amensaje);
+bool evaluarMensajeInt(uint16_t Avalor_min, uint16_t Avalor_max, String Aunidad);
+bool evaluarMensajeFloat(float Avalor_min, float Avalor_max, String Aunidad);
+// comandos
+void comandoStart();
+void comandoLecturas();
+void comandoInfo();
+void comandoProg();
+void comandoVentilar();
+void comandoTiempoAl();
+void comandoTiempoRiego();
+void comandoTiempoEspera();
+void comandoTmax();
+void comandoTmin();
+void comandoTvent();
+void comandoAlarma();
+void comandoHum();
+void comandoLed();
+void comandoReprog();
 
 
 #endif

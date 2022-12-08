@@ -14,7 +14,7 @@ bool		alarma_activada;			// 6.
 uint16_t	tiempo_bombeo_segundos;		// 7.	4 segundos (máx 65535 seg o 18,2 horas)
 uint16_t	tiempo_espera_minutos;		// 8.	15 minutos (máx 65535 min)
 
-#define CANT_VARIABLES_EEPROM 9	// bool, float, float, float, int, int, bool, int, int
+#define CANT_VARIABLES_EEPROM 9	// bool, float, float, float, int8, int, bool, int, int
 int longitud_dato_EEPROM[CANT_VARIABLES_EEPROM] = {1, 4, 4, 4, 1, 2, 1, 2, 2};
 int direccion[CANT_VARIABLES_EEPROM];
 int ESPACIOS_EEPROM;
@@ -175,7 +175,7 @@ void setDireccionesEEPROM()
 	direccion[2] = direccion[1] + 4;//float	temp_maxima_alarma
 	direccion[3] = direccion[2] + 4;//float	temp_minima_alarma
 	direccion[5] = direccion[3] + 4;//float	temp_maxima_ventilacion
-	direccion[6] = direccion[4] + 2;//int	humedad_suelo_minima
+	direccion[6] = direccion[4] + 1;//int	humedad_suelo_minima
 	direccion[7] = direccion[5] + 2;//int	lapso_alarma_minutos
 	direccion[8] = direccion[6] + 1;//bool	alarma_activada
 	direccion[9] = direccion[7] + 2;//int	tiempo_bombeo_segundos
