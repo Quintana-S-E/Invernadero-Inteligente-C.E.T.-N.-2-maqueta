@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------------------------------------------*\
 	Nombre:				Invernadero Inteligente maqueta ESP32 Node32s
-	Desarrollo: 		octubre y noviembre de 2022
+	Desarrollo: 		octubre - diciembre de 2022
 	Primer lanzamiento: 14 de noviembre de 2022
 	Creado por:			Pulido Norberto N., Quintana Santiago E., Riha Fabio, Sacchero Fidel, Inticito.
 \*------------------------------------------------------------------------------------------------------------------*/
@@ -72,7 +72,7 @@ void loop()
 		chequearAlarma();
 
 		// Actualizar datos mostrables
-		displayLecturas(mostrando_humedad);
+		actualizarDisplay();
 		actualizarGraficos();
 
 		// Tomar decisiones
@@ -83,10 +83,10 @@ void loop()
 		digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // parpadeamos el LED de la placa
 	}
 
-	// cambiamos el contenido de la pantalla (de mostrar humedad a temperatura y viceversa)
+	// cambiamos el contenido de la pantalla
 	if (millis() - ultima_vez_display_cambio >= DELAY_CAMBIO_DISPLAY)
 	{
 		ultima_vez_display_cambio = millis();
-		mostrando_humedad = !mostrando_humedad;
+		cambiarDatoDisplay();
 	}
 }

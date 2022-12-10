@@ -1,5 +1,5 @@
-#ifndef Declaraciones_h
-#define Declaraciones_h
+#pragma once
+
 #include <Arduino.h>
 #include <Adafruit_GFX.h>	  // display OLED
 #include <Adafruit_Sensor.h>
@@ -21,17 +21,8 @@
 	#define imprimirln(x)
 #endif
 
-// valores por defecto de la EEPROM
-#define TEMP_MAXIMA_ALARMA_DEFECTO 45.0F
-#define TEMP_MINIMA_ALARMA_DEFECTO -5.0F
-#define TEMP_MAXIMA_VENTILACION_DEFECTO 35.0F
-#define HUMEDAD_SUELO_MINIMA_DEFECTO 60
-#define LAPSO_ALARMA_MINUTOS_DEFECTO 60
-#define ALARMA_ACTIVADA_DEFECTO true
-#define TIEMPO_BOMBEO_SEGUNDOS_DEFECTO 10
-#define TIEMPO_ESPERA_MINUTOS_DEFECTO 15
-
 // Otras constantes de funcionamiento
+#define TELEGRAM_TIEMPO_MAX_CONFIGURACION 15000UL
 #define DELAY_ACTIVIDAD_INVERNADERO 0UL // (ms) tiempo de espera para el loop del invernadero
 #define DELAY_CAMBIO_DISPLAY 10000UL
 #define DELAY_ACTUALIZACION_DISPLAY 500UL
@@ -70,6 +61,13 @@
 #define FIELD_HUM_SUELO_INT 5
 #define FIELD_HUM_SUELO_EXT 6
 
+enum DatoMostradoEnDisplay
+{
+	Temperatura,
+	Humedad
+};
+DatoMostradoEnDisplay DatoDelDisplay = Temperatura;
+
 // Clases
 CTBot Bot;
 Servo Ventana;
@@ -93,7 +91,6 @@ unsigned long ultima_vez_comprobacion_WIFI = 0;
 bool ventilacion_forzada	= false; // si el estado de ventilación está siendo forzado por telegram
 bool ventilando				= false;
 bool esperando_riego		= false; // para chequearRiego()
-bool mostrando_humedad		= false; // para cambiar lo que se muestra en el display (humedad y temperatura)
 
 // Datos de los sensores
 // DHTs interiores
@@ -135,10 +132,11 @@ void desactivarVentilacion();
 
 // Display.h
 void inicializarDisplay();
+void cambiarDatoDisplay();
 void displayConectandoWIFI();
 void displayErrorWIFI();
 void displayConexionWIFI(String Amensaje_conectado_a, String Assid_conectada);
-void displayLecturas(bool Amostrando_humedad);
+void actualizarDisplay();
 void displayHum();
 void displayTemp();
 
@@ -178,6 +176,3 @@ void comandoAlarma();
 void comandoHum();
 void comandoLed();
 void comandoReprog();
-
-
-#endif

@@ -1,5 +1,5 @@
-#ifndef Telegram_h
-#define Telegram_h
+#pragma once
+
 #include "Claves.h"
 #include "Declaraciones.h"
 #include "Display.h"
@@ -12,7 +12,7 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 	while (CTBotMessageText == Bot.getNewMessage(mensaje))
 	{
 		String texto = mensaje.text;
-		String nombre_solicitante = mensaje.sender.firstName;
+		String nombre_remitente = mensaje.sender.firstName;
 		chat_rpta = ""; // borramos lo que hayamos escrito en llamadas anteriores
 		// imprimir el mensaje recibido
 		imprimirln("Mensaje obtenido:");
@@ -42,9 +42,9 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 		// si es el primer mensaje que recibe
 		if (chat_primer_mensaje)
 		{	// individual, o grupal siendo comando
-			if (!respondiendo_grupo  ||  (respondiendo_grupo  &&  texto.charAt(0) == '/'))
+			if (!respondiendo_grupo  ||  (respondiendo_grupo  &&  texto.startsWith("/")))
 			{
-				chat_rpta = "Bienvenido, " + nombre_solicitante + ".\n";
+				chat_rpta = "Bienvenido, " + nombre_remitente + ".\n";
 				if (texto != "/start")
 					chat_rpta += "Recuerde que puede enviar /start para ver los comandos";
 
@@ -102,14 +102,14 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 		else if (texto == "/reprogramarEEPROM")
 		{
 			EEPROM_programada = false;
-			escribirEEPROM(direccion[0], EEPROM_programada);
+			escribirEEPROM(direccion[DIR_EEPROM_PROGRAMADA], EEPROM_programada);
 			chat_rpta = "Resetar para reprogramar la EEPROM";
 		}
 
 		else if (texto == "/uwu")
 			chat_rpta = "Gracias 👉👈";
 
-		else if (texto.charAt(0) == '/') // si solamente empieza por "/"
+		else if (texto.startsWith("/")) // si solamente empieza por "/"
 			chat_rpta = "El comando enviado no es válido. Envíe /start para ver las opciones";
 
 		else // si el texto no es comando ni empieza con "/"
@@ -136,36 +136,36 @@ void comandoStart()
 
 //==================================================================================================================//
 
-void comandoInfo() // en "chequearMensajesRecibidosTelegram()"
+void comandoInfo()
 {
 	chat_rpta = "Estados:\n"; // ESTADOS
-	chat_rpta += "-Alarma: ";
+	chat_rpta += "•Alarma: ";
 	alarma_activada ? (chat_rpta += "activada") : (chat_rpta += "desactivada");
 	chat_rpta += ".\n";
 
-	chat_rpta += "-Ventilación: ";
+	chat_rpta += "•Ventilación: ";
 	ventilacion_forzada ? (chat_rpta += "forzada") : (chat_rpta += "en modo automático");
 	chat_rpta += " y ";
 	ventilando ? (chat_rpta += "activada") : (chat_rpta += "desactivada");
 	chat_rpta += ".\n";
 
-	chat_rpta += "-Tierra: ";
+	chat_rpta += "•Tierra: ";
 	if (esperando_riego)
 		chat_rpta += "regada, esperando la absorción";
 	else
 		chat_rpta += "suficientemente húmeda";
 	chat_rpta += ".\n";
 
-	chat_rpta += "-LED: ";
+	chat_rpta += "•LED: ";
 	digitalRead(LED_ROJO) ? (chat_rpta += "encendido") : (chat_rpta += "apagado");
 	chat_rpta += ".\n\n";
 
 	chat_rpta += "\nParámetros:\n"; // PARÁMETROS
-	chat_rpta += "-Humedad mínima del suelo: ";
+	chat_rpta += "•Humedad mínima del suelo: ";
 	chat_rpta += String(humedad_suelo_minima);
 	chat_rpta += " %.\n";
 
-	chat_rpta += "-Lapso de envío de alarmas: ";
+	chat_rpta += "•Lapso de envío de alarmas: ";
 	int lapso_alarma_horas = lapso_alarma_minutos / 60;
 	int lapso_alarma_horas_resto = lapso_alarma_minutos % 60;
 	chat_rpta += String(lapso_alarma_horas);
@@ -178,15 +178,15 @@ void comandoInfo() // en "chequearMensajesRecibidosTelegram()"
 	}
 	chat_rpta += ".\n";
 
-	chat_rpta += "-Lapso de bombeo del riego: ";
+	chat_rpta += "•Lapso de bombeo del riego: ";
 	chat_rpta += String(tiempo_bombeo_segundos);
 	chat_rpta += " segundos.\n";
 
-	chat_rpta += "-Lapso de espera luego del riego: ";
+	chat_rpta += "•Lapso de espera luego del riego: ";
 	chat_rpta += String(tiempo_espera_minutos);
 	chat_rpta += " min.\n";
 
-	chat_rpta += "-Temperaturas de la alarma: ";
+	chat_rpta += "•Temperaturas de la alarma: ";
 	chat_rpta += String(temp_minima_alarma);
 	chat_rpta += " °C ";
 	chat_rpta += "(mín), ";
@@ -194,7 +194,7 @@ void comandoInfo() // en "chequearMensajesRecibidosTelegram()"
 	chat_rpta += " °C ";
 	chat_rpta += "(máx).\n";
 
-	chat_rpta += "-Temperatura de apertura de la ventilación: ";
+	chat_rpta += "•Temperatura de apertura de la ventilación: ";
 	chat_rpta += String(temp_maxima_ventilacion);
 	chat_rpta += " °C.";
 }
@@ -205,12 +205,11 @@ void comandoLecturas()
 {// leerSensores() es llamada justo antes en el loop, así que no la llamamos para no retrasar
 	chat_rpta = "Temperatura interior: " + String(temp_interior_promedio) + " °C\n";
 	chat_rpta += "Humedad del suelo interior: " + String(humedad_suelo_interior) + " %\n";
-	chat_rpta += "Humedad del aire interior: " + String(humedad_aire_interior_promedio) + " %\n";
-	chat_rpta += "\n";
+	chat_rpta += "Humedad del aire interior: " + String(humedad_aire_interior_promedio) + " %\n\n";
 	chat_rpta += "Temperatura exterior: " + String(temp_exterior) + " °C\n";
 	chat_rpta += "Humedad del suelo exterior: " + String(humedad_suelo_exterior) + " %\n";
-	chat_rpta += "Humedad del aire exterior: " + String(humedad_aire_exterior) + " %\n";
-	chat_rpta += "\nPara ver gráficos históricos de los datos ingrese al link:\n";
+	chat_rpta += "Humedad del aire exterior: " + String(humedad_aire_exterior) + " %\n\n";
+	chat_rpta += "Para ver gráficos históricos de los datos ingrese al link:\n";
 	chat_rpta += "https://thingspeak.com/channels/1937932";
 }
 
@@ -272,7 +271,7 @@ void comandoTiempoAl()
 	if (evaluarMensajeInt(1, 65535U, "minutos"))
 	{
 		lapso_alarma_minutos = chat_numero_entrada_int;
-		escribirEEPROM(direccion[5], lapso_alarma_minutos);
+		escribirEEPROM(direccion[DIR_LAPSO_ALARMA_MINUTOS], lapso_alarma_minutos);
 	}
 	// pedirlo en horas (1,5 horas, 3,5 horas, etc)
 }
@@ -292,7 +291,7 @@ void comandoTiempoRiego()
 	if (evaluarMensajeInt(1, 65535U, "segundos"))
 	{
 		tiempo_bombeo_segundos = chat_numero_entrada_int;
-		escribirEEPROM(direccion[7], tiempo_bombeo_segundos);
+		escribirEEPROM(direccion[DIR_TIEMPO_BOMBEO_SEGUNDOS], tiempo_bombeo_segundos);
 	}
 }
 
@@ -311,7 +310,7 @@ void comandoTiempoEspera()
 	if (evaluarMensajeInt(1, 65535U, "minutos"))
 	{
 		tiempo_espera_minutos = chat_numero_entrada_int;
-		escribirEEPROM(direccion[8], tiempo_espera_minutos);
+		escribirEEPROM(direccion[DIR_TIEMPO_ESPERA_MINUTOS], tiempo_espera_minutos);
 	}
 }
 
@@ -332,7 +331,7 @@ void comandoTmax()
 	if (evaluarMensajeFloat(temp_minima_alarma, 500.0F, "°C"))
 	{
 		temp_maxima_alarma = chat_numero_entrada_float;
-		escribirEEPROM(direccion[1], temp_maxima_alarma);
+		escribirEEPROM(direccion[DIR_TEMP_MAXIMA_ALARMA], temp_maxima_alarma);
 	}
 }
 
@@ -353,7 +352,7 @@ void comandoTmin()
 	if (evaluarMensajeFloat(-500.0F, temp_maxima_alarma, "°C"))
 	{
 		temp_minima_alarma = chat_numero_entrada_float;
-		escribirEEPROM(direccion[2], temp_minima_alarma);
+		escribirEEPROM(direccion[DIR_TEMP_MINIMA_ALARMA], temp_minima_alarma);
 	}
 }
 
@@ -372,7 +371,7 @@ void comandoTvent()
 	if (evaluarMensajeFloat(-500.0F, 500.0F, "°C"))
 	{
 		temp_maxima_ventilacion = chat_numero_entrada_float;
-		escribirEEPROM(direccion[3], temp_maxima_ventilacion);
+		escribirEEPROM(direccion[DIR_TEMP_MAXIMA_VENTILACION], temp_maxima_ventilacion);
 	}
 }
 
@@ -381,7 +380,7 @@ void comandoTvent()
 void comandoAlarma()
 {
 	alarma_activada = !alarma_activada;
-	escribirEEPROM(direccion[6], alarma_activada);
+	escribirEEPROM(direccion[DIR_ALARMA_ACTIVADA], alarma_activada);
 
 	chat_rpta = "La alarma está ahora ";
 	alarma_activada ? (chat_rpta += "activada") : (chat_rpta += "desactivada");
@@ -402,7 +401,7 @@ void comandoHum()
 	if (evaluarMensajeInt(0, 100, "%"))
 	{
 		humedad_suelo_minima = chat_numero_entrada_int;
-		escribirEEPROM(direccion[4], humedad_suelo_minima);
+		escribirEEPROM(direccion[DIR_HUMEDAD_SUELO_MINIMA], humedad_suelo_minima);
 	}
 }
 
@@ -440,33 +439,33 @@ void enviarMensaje(uint64_t Aid, String Amensaje)
 
 bool evaluarMensajeInt(uint16_t Avalor_min, uint16_t Avalor_max, String Aunidad)
 {
-	delay(5000); // esperamos 10 segundos para introducir una respuesta
-
 	TBMessage msj;
-	// si llegó un mensaje
-	if (CTBotMessageText == Bot.getNewMessage(msj))
+	unsigned int tiempo_envio_inicial = millis();
+
+	// mientras no llegue un mensaje
+	while (Bot.getNewMessage(msj) != CTBotMessageText)
 	{
-		chat_numero_entrada_int = msj.text.toInt(); // pasamos el texto a número
-		// si el número es válido
-		if (chat_numero_entrada_int >= Avalor_min  &&  chat_numero_entrada_int <= Avalor_max)
+		if (millis() - tiempo_envio_inicial >= TELEGRAM_TIEMPO_MAX_CONFIGURACION) // si pasan x segundos
 		{
-			chat_rpta = "Se ingresó: ";
-			chat_rpta += String(chat_numero_entrada_int);
-			chat_rpta += " ";
-			chat_rpta += Aunidad;
-			chat_rpta += ".\n\nEl valor se cambió exitosamente";
-			return true; // devuelve siempre false, excepto que el número sea perfecto
+			chat_rpta = "No se introdujo un número. El valor no cambió.\nCuando realiza un cambio, tiene ";
+			chat_rpta += String(TELEGRAM_TIEMPO_MAX_CONFIGURACION / 1000);
+			chat_rpta += " segundos para introducir su nuevo valor";
+			return false;
 		}
-
-		chat_rpta = "El número ingresado no es válido. El valor no cambió.\n";
-		chat_rpta += "Intente revisar los límites máximos y/o mínimos del valor (si los hubiera)";
 	}
-	else // si no llegó un mensaje
+	// llegó un mensaje, pasamos el texto a número, y evaluamos su validez
+	chat_numero_entrada_int = msj.text.toInt();
+	if (chat_numero_entrada_int >= Avalor_min  &&  chat_numero_entrada_int <= Avalor_max)
 	{
-		chat_rpta = "No se introdujo un número. El valor no cambió.\n";
-		chat_rpta += "Cuando realiza un cambio, tiene 10 segundos para introducir su nuevo valor";
+		chat_rpta = "Se ingresó: ";
+		chat_rpta += String(chat_numero_entrada_int);
+		chat_rpta += " ";
+		chat_rpta += Aunidad;
+		chat_rpta += ".\n\nEl valor se cambió exitosamente";
+		return true; // excepto que el número sea perfecto, devuelve siempre false
 	}
-
+	chat_rpta = "El número ingresado no es válido. El valor no cambió.\n";
+	chat_rpta += "Intente revisar los límites máximos y/o mínimos del valor (si los hubiera)";
 	return false;
 }
 
@@ -474,33 +473,33 @@ bool evaluarMensajeInt(uint16_t Avalor_min, uint16_t Avalor_max, String Aunidad)
 
 bool evaluarMensajeFloat(float Avalor_min, float Avalor_max, String Aunidad)
 {
-	delay(5000); // esperamos 10 segundos para introducir una respuesta
-
 	TBMessage msj;
-	// si llegó un mensaje
-	if (CTBotMessageText == Bot.getNewMessage(msj))
+	unsigned int tiempo_envio_inicial = millis();
+
+	// mientras no llegue un mensaje
+	while (Bot.getNewMessage(msj) != CTBotMessageText)
 	{
-		chat_numero_entrada_float = msj.text.toFloat(); // pasamos el texto a número
-		// si el número es válido
-		if (chat_numero_entrada_float >= Avalor_min  &&  chat_numero_entrada_float <= Avalor_max)
+		if (millis() - tiempo_envio_inicial >= TELEGRAM_TIEMPO_MAX_CONFIGURACION) // si pasan x segundos
 		{
-			chat_rpta = "Se ingresó: ";
-			chat_rpta += String(chat_numero_entrada_float);
-			chat_rpta += " ";
-			chat_rpta += Aunidad;
-			chat_rpta += ".\n\nEl valor se cambió exitosamente";
-			return true; // devuelve siempre false, excepto que el número sea perfecto
+			chat_rpta = "No se introdujo un número. El valor no cambió.\nCuando realiza un cambio, tiene ";
+			chat_rpta += String(TELEGRAM_TIEMPO_MAX_CONFIGURACION / 1000);
+			chat_rpta += " segundos para introducir su nuevo valor";
+			return false;
 		}
-
-		chat_rpta = "El número ingresado no es válido. El valor no cambió.\n";
-		chat_rpta += "Intente revisar los límites máximos y/o mínimos del valor (si los hubiera)";
 	}
-	else // si no llegó un mensaje
+	// llegó un mensaje, pasamos el texto a número, y evaluamos su validez
+	chat_numero_entrada_float = msj.text.toFloat();
+	if (chat_numero_entrada_float >= Avalor_min  &&  chat_numero_entrada_float <= Avalor_max)
 	{
-		chat_rpta = "No se introdujo un número. El valor no cambió.\n";
-		chat_rpta += "Cuando realiza un cambio, tiene 10 segundos para introducir su nuevo valor";
+		chat_rpta = "Se ingresó: ";
+		chat_rpta += String(chat_numero_entrada_float);
+		chat_rpta += " ";
+		chat_rpta += Aunidad;
+		chat_rpta += ".\n\nEl valor se cambió exitosamente";
+		return true; // excepto que el número sea perfecto, devuelve siempre false
 	}
-
+	chat_rpta = "El número ingresado no es válido. El valor no cambió.\n";
+	chat_rpta += "Intente revisar los límites máximos y/o mínimos del valor (si los hubiera)";
 	return false;
 }
 
@@ -602,16 +601,34 @@ bool conectarWIFICon(String Assid, String Apassword) // en "setup()"
 	return stat_WIFI;
 }
 
+// anterior sistema para recibir un mensaje de cambio de parámetros (int)
 /*
-// DEBUG ====================================================
-//			imprimirln("Antes en la dirección 7 (alarma_activada) había un: ");
-//			imprimirln(EEPROM.get(direccion[6], alarma_activada));
-// DEBUG ====================================================
-			comandoAlarma();
-// DEBUG ====================================================
-//			imprimirln("Ahora en la dirección 7 (alarma_activada) hay un: ");
-//			imprimirln(EEPROM.get(direccion[6], alarma_activada));
-// DEBUG ====================================================
-*/
+	delay(10000); // esperamos 10 segundos para introducir una respuesta
 
-#endif
+	TBMessage msj;
+	// si llegó un mensaje
+	if (CTBotMessageText == Bot.getNewMessage(msj))
+	{
+		chat_numero_entrada_int = msj.text.toInt(); // pasamos el texto a número
+		// si el número es válido
+		if (chat_numero_entrada_int >= Avalor_min  &&  chat_numero_entrada_int <= Avalor_max)
+		{
+			chat_rpta = "Se ingresó: ";
+			chat_rpta += String(chat_numero_entrada_int);
+			chat_rpta += " ";
+			chat_rpta += Aunidad;
+			chat_rpta += ".\n\nEl valor se cambió exitosamente";
+			return true; // devuelve siempre false, excepto que el número sea perfecto
+		}
+
+		chat_rpta = "El número ingresado no es válido. El valor no cambió.\n";
+		chat_rpta += "Intente revisar los límites máximos y/o mínimos del valor (si los hubiera)";
+	}
+	else // si no llegó un mensaje
+	{
+		chat_rpta = "No se introdujo un número. El valor no cambió.\n";
+		chat_rpta += "Cuando realiza un cambio, tiene 10 segundos para introducir su nuevo valor";
+	}
+
+	return false;
+*/

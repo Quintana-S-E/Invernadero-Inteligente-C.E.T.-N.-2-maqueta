@@ -1,5 +1,5 @@
-#ifndef Sensores_h
-#define Sensores_h
+#pragma once
+
 #include "Declaraciones.h"
 
 void leerSensores() // en "loop()"
@@ -94,6 +94,3 @@ void leerSoilExteriores() // en leerSensores()
 	humedad_suelo_exterior = (humedad_suelo_exterior_sum / MUESTRAS_HUMEDAD_SUELO);
 	humedad_suelo_exterior = map(humedad_suelo_exterior, 0, 4095, 100, 0);
 }
-
-
-#endif

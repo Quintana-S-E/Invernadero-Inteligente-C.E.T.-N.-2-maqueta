@@ -1,5 +1,5 @@
-#ifndef Display_h
-#define Display_h
+#pragma once
+
 #include "Declaraciones.h"
 
 void inicializarDisplay() // en "setup()"
@@ -12,6 +12,22 @@ void inicializarDisplay() // en "setup()"
 	delay(2000);
 	Display.clearDisplay();
 	Display.setTextColor(WHITE);
+}
+
+//==================================================================================================================//
+
+void cambiarDatoDisplay()
+{
+	switch (DatoDelDisplay)
+	{
+	case Temperatura:
+		DatoDelDisplay = Humedad;
+		break;
+	
+	case Humedad:
+		DatoDelDisplay = Temperatura;
+		break;
+	}
 }
 
 //==================================================================================================================//
@@ -52,19 +68,29 @@ void displayConexionWIFI(String Amensaje_conectado_a, String Assid_conectada) //
 
 //==================================================================================================================//
 
-// sólo actualizamos los números del display cada cierto tiempo (porque si no los números parpadean)
-void displayLecturas(bool Amostrando_humedad) // en "loop()"
+void actualizarDisplay() // en "loop()"
 {
+	// sólo actualizamos los números del display cada cierto tiempo (porque si no los números parpadean)
 	if (millis() - ultima_vez_display_actualizo >= DELAY_ACTUALIZACION_DISPLAY)
 	{
 		ultima_vez_display_actualizo = millis();
-		Amostrando_humedad ? displayHum() : displayTemp();
+
+		switch (DatoDelDisplay)
+		{
+			case Temperatura:
+				displayTemp();
+				break;
+
+			case Humedad:
+				displayHum();
+				break;
+		}
 	}
 }
 
 //==================================================================================================================//
 
-void displayHum() // en "displayLecturas()"
+void displayHum() // en "actualizarDisplay()"
 {
 	// limpiar display
 	Display.clearDisplay();
@@ -92,7 +118,7 @@ void displayHum() // en "displayLecturas()"
 
 //==================================================================================================================//
 
-void displayTemp() // en "displayLecturas()"
+void displayTemp() // en "actualizarDisplay()"
 {
 	// limpiar display
 	Display.clearDisplay();
@@ -127,6 +153,3 @@ void displayTemp() // en "displayLecturas()"
 
 	Display.display();
 }
-
-
-#endif

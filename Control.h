@@ -1,5 +1,4 @@
-#ifndef Control_h
-#define Control_h
+#pragma once
 #include "Declaraciones.h"
 #include "EEPROM_manejo.h"
 
@@ -88,6 +87,3 @@ void chequear_iluminacion()
 {
 	// ...
 }*/
-
-
-#endif

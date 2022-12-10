@@ -1,5 +1,5 @@
-#ifndef Graficos_h
-#define Graficos_h
+#pragma once
+
 #include "Declaraciones.h"
 #include "Claves.h"
 
@@ -26,6 +26,3 @@ void actualizarGraficos()
         }
 	}
 }
-
-
-#endif
