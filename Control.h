@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Declaraciones.h"
 #include "EEPROM_manejo.h"
 

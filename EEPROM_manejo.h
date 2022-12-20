@@ -3,51 +3,14 @@
 #include <EEPROM.h>
 #include "Declaraciones.h"
 
-// Variables de la EEPROM con sus valores por defecto
-#define TEMP_MAXIMA_ALARMA_DEFECTO		45.0F
-#define TEMP_MINIMA_ALARMA_DEFECTO		-5.0F
-#define TEMP_MAXIMA_VENTILACION_DEFECTO	35.0F
-#define HUMEDAD_SUELO_MINIMA_DEFECTO	60
-#define LAPSO_ALARMA_MINUTOS_DEFECTO	60
-#define ALARMA_ACTIVADA_DEFECTO			true
-#define TIEMPO_BOMBEO_SEGUNDOS_DEFECTO	10
-#define TIEMPO_ESPERA_MINUTOS_DEFECTO	15
-bool		EEPROM_programada;			// 0.	para verificar si está programada o no la EEPROM
-float		temp_maxima_alarma;			// 1.
-float		temp_minima_alarma;			// 2.
-float		temp_maxima_ventilacion;	// 3.
-uint8_t		humedad_suelo_minima;		// 4.	70 % es vaso de agua, 29 % es el aire
-uint16_t	lapso_alarma_minutos;		// 5.	60 minutos (máx 65535 min o 1092 horas o 45 días)
-bool		alarma_activada;			// 6.
-uint16_t	tiempo_bombeo_segundos;		// 7.	4 segundos (máx 65535 seg o 18,2 horas)
-uint16_t	tiempo_espera_minutos;		// 8.	15 minutos (máx 65535 min)
-
-// Manejo de las direcciones de la EEPROM
-enum EEPROMDireccionesVariables
-{
-	DIR_EEPROM_PROGRAMADA,
-	DIR_TEMP_MAXIMA_ALARMA,
-	DIR_TEMP_MINIMA_ALARMA,
-	DIR_TEMP_MAXIMA_VENTILACION,
-	DIR_HUMEDAD_SUELO_MINIMA,
-	DIR_LAPSO_ALARMA_MINUTOS,
-	DIR_ALARMA_ACTIVADA,
-	DIR_TIEMPO_BOMBEO_SEGUNDOS,
-	DIR_TIEMPO_ESPERA_MINUTOS
-};
-#define CANT_VARIABLES_EEPROM 9	// bool, float, float, float, int8, int, bool, int, int
-int longitud_dato_EEPROM[CANT_VARIABLES_EEPROM] = {1, 4, 4, 4, 1, 2, 1, 2, 2};
-int direccion[CANT_VARIABLES_EEPROM];
-int ESPACIOS_EEPROM;
-
 void setDireccionesEEPROM() // en "setup()"
 {
 	// hay que hacer EEPROM.put a las direcciones indicadas, según la longitud de los datos escritos anteriormente
 	int i;
 	direccion[0] = 0;
 	for (i = 1; i < CANT_VARIABLES_EEPROM; i++)
-		direccion[i] = direccion[i - 1] + longitud_dato_EEPROM[i - 1];
-	ESPACIOS_EEPROM = direccion[i - 1] + longitud_dato_EEPROM[i - 1];
+		direccion[i] = direccion[i - 1] + LONGITUD_DATO_EEPROM[i - 1];
+	espacios_EEPROM = direccion[i - 1] + LONGITUD_DATO_EEPROM[i - 1];
 }
 
 //==================================================================================================================//
@@ -55,7 +18,7 @@ void setDireccionesEEPROM() // en "setup()"
 void chequearEEPROMProgramada() // en "setup()"
 {
 	setDireccionesEEPROM();
-	EEPROM.begin(ESPACIOS_EEPROM); // la abrimos
+	EEPROM.begin(espacios_EEPROM); // la abrimos
 	EEPROM_programada = (EEPROM.read(0) == 255 || EEPROM.read(0) == 0) ? false : true;
 	EEPROM.end(); // la cerramos
 
@@ -79,7 +42,7 @@ void chequearEEPROMProgramada() // en "setup()"
 
 void leerEEPROMProgramada() // en "chequearEEPROMProgramada()"
 {
-	EEPROM.begin(ESPACIOS_EEPROM);
+	EEPROM.begin(espacios_EEPROM);
 	EEPROM.get(direccion[DIR_EEPROM_PROGRAMADA],		EEPROM_programada); //	*1
 	EEPROM.get(direccion[DIR_TEMP_MAXIMA_ALARMA],		temp_maxima_alarma);
 	EEPROM.get(direccion[DIR_TEMP_MINIMA_ALARMA],		temp_minima_alarma);
@@ -107,7 +70,7 @@ void cargarValoresPorDefecto()
 	tiempo_bombeo_segundos =	TIEMPO_BOMBEO_SEGUNDOS_DEFECTO;
 	tiempo_espera_minutos =		TIEMPO_ESPERA_MINUTOS_DEFECTO;
 
-	EEPROM.begin(ESPACIOS_EEPROM);
+	EEPROM.begin(espacios_EEPROM);
 	EEPROM.put(direccion[DIR_EEPROM_PROGRAMADA],		EEPROM_programada);
 	EEPROM.put(direccion[DIR_TEMP_MAXIMA_ALARMA],		temp_maxima_alarma);
 	EEPROM.put(direccion[DIR_TEMP_MINIMA_ALARMA],		temp_minima_alarma);
@@ -126,7 +89,7 @@ void cargarValoresPorDefecto()
 template <typename T> // puede aceptar cualquier tipo de dato de entrada
 void escribirEEPROM(int Adireccion, T Adato) // en chequearMensajesRecibidosTelegram()
 {
-	EEPROM.begin(ESPACIOS_EEPROM);
+	EEPROM.begin(espacios_EEPROM);
 	EEPROM.put(Adireccion, Adato);
 	EEPROM.commit();
 	EEPROM.end();
@@ -176,7 +139,7 @@ acá todas las variables solamente y después:
 
 #define CANT_VARIABLES_EEPROM 10
 int direccion[CANT_VARIABLES_EEPROM];
-int ESPACIOS_EEPROM;
+int espacios_EEPROM;
 
 void setDireccionesEEPROM()
 {
@@ -190,6 +153,6 @@ void setDireccionesEEPROM()
 	direccion[7] = direccion[5] + 2;//int	lapso_alarma_minutos
 	direccion[8] = direccion[6] + 1;//bool	alarma_activada
 	direccion[9] = direccion[7] + 2;//int	tiempo_bombeo_segundos
- ESPACIOS_EEPROM = direccion[8] + 2;//int	tiempo_espera_minutos
+ espacios_EEPROM = direccion[8] + 2;//int	tiempo_espera_minutos
 }
 */

@@ -4,6 +4,7 @@
 #include "Declaraciones.h"
 #include "Display.h"
 #include "EEPROM_manejo.h"
+#include "Graficos.h"
 
 void chequearMensajesRecibidosTelegram() // en "loop()"
 {
@@ -54,59 +55,60 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 		}
 		chat_rpta = ""; // por seguridad
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Acá evaluamos qué mensaje fue enviado XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX//
-		if (texto == "/start")
+// Se hace con texto.startsWith() por el @Invernadero_Inteligente_bot que a veces se agrega al tocar un comando
+		if (texto.startsWith("/start"))
 			comandoStart();
 
-		else if (texto == "/info")
+		else if (texto.startsWith("/info"))
 			comandoInfo();
-		
-		else if (texto == "/lecturas")
+
+		else if (texto.startsWith("/lecturas"))
 			comandoLecturas();
 
-		else if (texto == "/prog")
+		else if (texto.startsWith("/prog"))
 			comandoProg();
 
-		else if (texto == "/ventilar")
+		else if (texto.startsWith("/ventilar"))
 			comandoVentilar();
 
-		else if (texto == "/tiempoAl")
+		else if (texto.startsWith("/tiempoAl"))
 			comandoTiempoAl();
 
-		else if (texto == "/tiempoRiego")
+		else if (texto.startsWith("/tiempoRiego"))
 			comandoTiempoRiego();
 
-		else if (texto == "/tiempoEspera")
+		else if (texto.startsWith("/tiempoEspera"))
 			comandoTiempoEspera();
 
-		else if (texto == "/tmax")
+		else if (texto.startsWith("/tmax"))
 			comandoTmax();
 
-		else if (texto == "/tmin")
+		else if (texto.startsWith("/tmin"))
 			comandoTmin();
 
-		else if (texto == "/tvent")
+		else if (texto.startsWith("/tvent"))
 			comandoTvent();
 
-		else if (texto == "/alarma")
+		else if (texto.startsWith("/alarma"))
 			comandoAlarma();
 
-		else if (texto == "/hum")
+		else if (texto.startsWith("/hum"))
 			comandoHum();
 
-		else if (texto == "/led")
+		else if (texto.startsWith("/led"))
 			comandoLed();
 
-		else if (texto == "/reprog")
+		else if (texto.startsWith("/reprog"))
 			comandoReprog();
 
-		else if (texto == "/reprogramarEEPROM")
+		else if (texto == "/reprogramarEEPROM") // comando oculto, no hace falta el texto.startsWith()
 		{
 			EEPROM_programada = false;
 			escribirEEPROM(direccion[DIR_EEPROM_PROGRAMADA], EEPROM_programada);
 			chat_rpta = "Resetar para reprogramar la EEPROM";
 		}
 
-		else if (texto == "/uwu")
+		else if (texto == "/uwu") // comando oculto, no hace falta el texto.startsWith()
 			chat_rpta = "Gracias 👉👈";
 
 		else if (texto.startsWith("/")) // si solamente empieza por "/"
@@ -122,9 +124,7 @@ void chequearMensajesRecibidosTelegram() // en "loop()"
 	} // cierra el while() de "mientras haya nuevos mensajes, chequear su contenido"
 } // cierra la función chequearMensajesRecibidosTelegram()
 
-
 //=====================================================COMANDOS=====================================================//
-
 
 void comandoStart()
 {
@@ -166,16 +166,7 @@ void comandoInfo()
 	chat_rpta += " %.\n";
 
 	chat_rpta += "•Lapso de envío de alarmas: ";
-	int lapso_alarma_horas = lapso_alarma_minutos / 60;
-	int lapso_alarma_horas_resto = lapso_alarma_minutos % 60;
-	chat_rpta += String(lapso_alarma_horas);
-	chat_rpta += " h";
-	if (lapso_alarma_horas_resto != 0)
-	{
-		chat_rpta += " ";
-		chat_rpta += String(lapso_alarma_horas_resto);
-		chat_rpta += " min";
-	}
+	chat_rpta += mensajeMinutosATiempo(lapso_alarma_minutos);
 	chat_rpta += ".\n";
 
 	chat_rpta += "•Lapso de bombeo del riego: ";
@@ -202,7 +193,7 @@ void comandoInfo()
 //==================================================================================================================//
 
 void comandoLecturas()
-{// leerSensores() es llamada justo antes en el loop, así que no la llamamos para no retrasar
+{ // leerSensores() es llamada justo antes en el loop, así que no la llamamos para no retrasar
 	chat_rpta = "Temperatura interior: " + String(temp_interior_promedio) + " °C\n";
 	chat_rpta += "Humedad del suelo interior: " + String(humedad_suelo_interior) + " %\n";
 	chat_rpta += "Humedad del aire interior: " + String(humedad_aire_interior_promedio) + " %\n\n";
@@ -252,16 +243,8 @@ void comandoVentilar()
 
 void comandoTiempoAl()
 {
-	int lapso_alarma_horas = lapso_alarma_minutos / 60;
-	int lapso_alarma_horas_resto = lapso_alarma_minutos % 60;
 	chat_rpta = "El lapso de espera de la alarma está configurado en: ";
-	chat_rpta += String(lapso_alarma_horas) + " h";
-	if (lapso_alarma_horas_resto != 0)
-	{
-		chat_rpta += " ";
-		chat_rpta += String(lapso_alarma_horas_resto);
-		chat_rpta += " min";
-	}
+	chat_rpta += mensajeMinutosATiempo(lapso_alarma_minutos);
 	enviarMensaje(chat_id, chat_rpta);
 
 	chat_rpta = "Introduzca un nuevo valor en minutos (mayor a 0)"; // máx 65535 o 1092 horas o 45 días
@@ -428,11 +411,40 @@ void comandoReprog()
 
 //==================================================================================================================//
 
-void enviarMensaje(uint64_t Aid, String Amensaje)
+void enviarMensaje(const uint64_t Aid, const String& Amensaje)
 {
 	Bot.sendMessage(Aid, Amensaje);
 	imprimirln("Respuesta del BOT:");
 	imprimirln(Amensaje);
+}
+
+//==================================================================================================================//
+
+String mensajeMinutosATiempo(int minutos)
+{
+	int tiempo_horas = minutos / 60;
+	int tiempo_resto_minutos = minutos % 60;
+	char mensaje[20];
+
+	if (tiempo_horas == 0) // si no llega a la hora
+	{
+		if (tiempo_resto_minutos == 1)
+			sprintf(mensaje, "%d minuto", tiempo_resto_minutos);
+		else
+			sprintf(mensaje, "%d minutos", tiempo_resto_minutos);
+	}
+	else if (tiempo_resto_minutos == 0) // si da redondo en horas sin minutos
+	{
+		if (tiempo_horas == 1)
+			sprintf(mensaje, "%d hora", tiempo_horas);
+		else
+			sprintf(mensaje, "%d horas", tiempo_horas);
+	}
+	else
+	{
+		sprintf(mensaje, "%d h %d min", tiempo_horas, tiempo_resto_minutos);
+	}
+	return String(mensaje);
 }
 
 //==================================================================================================================//
@@ -503,14 +515,12 @@ bool evaluarMensajeFloat(float Avalor_min, float Avalor_max, String Aunidad)
 	return false;
 }
 
-
 //==================================================ALARMA Y WIFI===================================================//
-
 
 void chequearAlarma() // en "loop()"
 {
 	// no hay problema con que lapso_alarma_minutos sea uint16_t, se multiplica por un UL
-	if (millis() - ultima_vez_alarma_funciono >= (lapso_alarma_minutos * 60000UL)  &&  alarma_activada)
+	if (millis() - ultima_vez_alarma_funciono >= (lapso_alarma_minutos * 60000UL) && alarma_activada)
 	{
 		ultima_vez_alarma_funciono = millis();
 		if (chat_id == 0)
@@ -529,7 +539,6 @@ void chequearAlarma() // en "loop()"
 			mensaje += "La temperatura del invernadero es excesivamente baja";
 			enviarMensaje(chat_id, mensaje);
 		}
-		
 	}
 }
 
@@ -562,30 +571,29 @@ void conectarWIFI(bool parar_programa)
 	bool status_WIFI = false;
 	// probar con cada red (imprime y muestra en el display si se conectó)
 	if (!status_WIFI)
-		status_WIFI = conectarWIFICon(SSIDescuela, PASSWORDescuela); // conectar al WIFI de la escuela
+		status_WIFI = conectarWIFICon(CLAVES_SSID_ESCUELA, CLAVES_PASSWORD_ESCUELA); // conectar al WIFI de la escuela
 	if (!status_WIFI)
-		status_WIFI = conectarWIFICon(SSIDnoni, PASSWORDnoni); // si no se pudo, probar con el de noni
+		status_WIFI = conectarWIFICon(CLAVES_SSID_NONI, CLAVES_PASSWORD_NONI); // si no se pudo, probar con el de noni
 	if (!status_WIFI)
-		status_WIFI = conectarWIFICon(SSIDsanti, PASSWORDsanti); // si no se pudo, probar con el de santi
+		status_WIFI = conectarWIFICon(CLAVES_SSID_santi, CLAVES_PASSWORD_SANTI); // si no se pudo, probar con el de santi
 	if (!status_WIFI)
 	{
 		imprimirln("No se encuentra red WIFI.");
 		displayErrorWIFI();
-		if (parar_programa)
-			while (1) ;
+		if (parar_programa) { while (1) ; }
+		// TODO: mejorar el aviso de no encuentro de red WIFI
 	}
 	else
 	{
-		// conectar el bot a Telegram
-		Bot.setTelegramToken(BOT_TOKEN);
-		// inicializar ThingSpeak
-		ThingSpeak.begin(Cliente);
+		// conectar el bot a Telegram e inicializar ThingSpeak
+		Bot.setTelegramToken(CLAVES_BOT_TOKEN);
+		inicializarThingSpeak();
 	}
 }
 
 //==================================================================================================================//
 
-bool conectarWIFICon(String Assid, String Apassword) // en "setup()"
+bool conectarWIFICon(const String& Assid, const String& Apassword) // en "setup()"
 {
 	bool stat_WIFI;
 	String res_WIFI;

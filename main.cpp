@@ -28,10 +28,10 @@ void setup()
 	// ver, para el futuro https://forum.arduino.cc/t/digitalwritefast-digitalreadfast-pinmodefast-etc/47037
 
 	// inicializar servo
-		ESP32PWM::allocateTimer(0);
-		ESP32PWM::allocateTimer(1);
-		ESP32PWM::allocateTimer(2);
-		ESP32PWM::allocateTimer(3);
+	ESP32PWM::allocateTimer(0);
+	ESP32PWM::allocateTimer(1);
+	ESP32PWM::allocateTimer(2);
+	ESP32PWM::allocateTimer(3);
 	Ventana.setPeriodHertz(50);
 	Ventana.attach(PIN_SERVO);
 	Ventana.write(ANGULO_CERRADO); // ya que "ventilando" se inicializa como false

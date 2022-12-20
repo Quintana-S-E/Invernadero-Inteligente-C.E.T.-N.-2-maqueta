@@ -76,7 +76,7 @@ void leerDHT22Exteriores() // en leerSensores()
 	if (isnan(humedad_aire_exterior) || isnan(temp_exterior))
 		imprimirln("Fallo al leer el DHT22 exterior");
 	*/
-	
+
 	// con más sensores exteriores aquí haríamos el promedio
 }
 

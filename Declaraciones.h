@@ -8,7 +8,6 @@
 #include <CTBot.h>
 #include <DHT.h>
 #include <ESP32Servo.h>
-#include <ThingSpeak.h>
 #include <Wire.h> // I2C
 #include <WiFi.h> // Gráficos.h
 
@@ -21,19 +20,11 @@
 	#define imprimirln(x)
 #endif
 
-// Otras constantes de funcionamiento
-#define TELEGRAM_TIEMPO_MAX_CONFIGURACION 15000UL
+// Constantes de funcionamiento generales
 #define DELAY_ACTIVIDAD_INVERNADERO 0UL // (ms) tiempo de espera para el loop del invernadero
-#define DELAY_CAMBIO_DISPLAY 10000UL
-#define DELAY_ACTUALIZACION_DISPLAY 500UL
-#define DELAY_COMPROBACION_WIFI 60000UL // cada un minuto comprueba la conexión a WiFi
-#define SCREEN_WIDTH 128			  // ancho del display OLED display, en píxeles
-#define SCREEN_HEIGHT 64			  // alto del display OLED display, en píxeles
-#define ANGULO_APERTURA 90			  // posición de apertura de la ventana
-#define ANGULO_CERRADO 0			  // posición de cerrado de la ventana
-#define MUESTRAS_HUMEDAD_SUELO 16	  // 16 máximo
 
-// Pines de salida
+// Pines
+// de salida
 #ifndef LED_BUILTIN
 	#define LED_BUILTIN 2
 #endif
@@ -41,58 +32,31 @@
 #define PIN_BOMBA 18
 #define PIN_VENTILADOR 19
 #define PIN_SERVO 23
-
-// Pines de los sensores DHT
+// de los sensores DHT
 #define DHT_INT_LOW_PIN 27
 #define DHT_INT_HIGH_PIN 14
-#define DHT_EXT_PIN 13
-//#define DHT_INT_MID_PIN // Para el domo
-
-// Pines de los sensores humedad suelo
+#define DHT_EXT_PIN 13 //#define DHT_INT_MID_PIN // Para el domo
+// de los sensores humedad suelo
 #define SOIL_EXT_PIN A0
-#define SOIL_INT_PIN A3
-//#define SOIL_INT_2_PIN A6 // Para el domo
+#define SOIL_INT_PIN A3 //#define SOIL_INT_2_PIN A6 // Para el domo
 
-// ThingSpeak
-#define FIELD_TEMP_INT 1
-#define FIELD_TEMP_EXT 2
-#define FIELD_HUM_AIRE_INT 3
-#define FIELD_HUM_AIRE_EXT 4
-#define FIELD_HUM_SUELO_INT 5
-#define FIELD_HUM_SUELO_EXT 6
-
-enum DatoMostradoEnDisplay
-{
-	Temperatura,
-	Humedad
-};
-DatoMostradoEnDisplay DatoDelDisplay = Temperatura;
-
-// Clases
-CTBot Bot;
-Servo Ventana;
-WiFiClient Cliente;
-Adafruit_SSD1306 Display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
-DHT DhtInteriorLow(DHT_INT_LOW_PIN, DHT22);
-DHT DhtInteriorHigh(DHT_INT_HIGH_PIN, DHT22);
-DHT DhtExterior(DHT_EXT_PIN, DHT22);
-//DHT DhtInteriorMid(DHT_INT_MID_PIN, DHT22); // Para el domo
-
-// Variables de tiempo
+// Variables de tiempo generales
 unsigned long ultima_vez_invernadero_funciono = 0;
 unsigned long ultima_vez_display_cambio = 0;
-unsigned long ultima_vez_display_actualizo = 0;
-unsigned long ultima_vez_thingspeak_actualizo = 0;
-unsigned long ultima_vez_bomba_encendio = 0;
-unsigned long ultima_vez_alarma_funciono = 0;
-unsigned long ultima_vez_comprobacion_WIFI = 0;
 
-// Flags de estado
+// Flags de estado generales
 bool ventilacion_forzada	= false; // si el estado de ventilación está siendo forzado por telegram
 bool ventilando				= false;
 bool esperando_riego		= false; // para chequearRiego()
 
-// Datos de los sensores
+// Sensores.h
+#define MUESTRAS_HUMEDAD_SUELO 16		// 16 máximo
+void leerSensores();
+void leerDHT22Interiores();
+void leerSoilInteriores();
+void leerDHT22Exteriores();
+void leerSoilExteriores();
+// variables
 // DHTs interiores
 float temp_interior_promedio;
 float humedad_aire_interior_promedio;
@@ -103,25 +67,9 @@ float humedad_aire_exterior;
 int humedad_suelo_interior;
 int humedad_suelo_exterior;
 
-// EEMPROM_manejo.h
-void chequearEEPROMProgramada();
-void setDireccionesEEPROM();
-void leerEEPROMProgramada();
-void cargarValoresPorDefecto();
-void imprimirEEPROMValsDirsReads();
-template <typename T>
-void escribirEEPROM(int Adireccion, T Adato);
-//template <typename T>
-//T leerEEPROM(int Adireccion, T Adato);
-
-// Sensores.h
-void leerSensores();
-void leerDHT22Interiores();
-void leerSoilInteriores();
-void leerDHT22Exteriores();
-void leerSoilExteriores();
 
 // Control.h
+unsigned long ultima_vez_bomba_encendio = 0;
 void chequearVentilacion();
 void chequearRiego();
 void activarVentilacion();
@@ -129,8 +77,12 @@ void desactivarVentilacion();
 //void abrirVentana();
 //void cerrarVentana();
 //void chequear_iluminacion();
+#define ANGULO_APERTURA	90		// posición de apertura de la ventana
+#define ANGULO_CERRADO	0		// posición de cerrado de la ventana
+
 
 // Display.h
+unsigned long ultima_vez_display_actualizo = 0;
 void inicializarDisplay();
 void cambiarDatoDisplay();
 void displayConectandoWIFI();
@@ -139,12 +91,35 @@ void displayConexionWIFI(String Amensaje_conectado_a, String Assid_conectada);
 void actualizarDisplay();
 void displayHum();
 void displayTemp();
+#define DELAY_CAMBIO_DISPLAY		10000UL
+#define DELAY_ACTUALIZACION_DISPLAY	500UL
+#define SCREEN_WIDTH				128		// ancho del display OLED display, en píxeles
+#define SCREEN_HEIGHT				64		// alto del display OLED display, en píxeles
+enum DatoMostradoEnDisplay
+{
+	Temperatura,
+	Humedad
+};
+DatoMostradoEnDisplay DatoDelDisplay = Temperatura;
+
 
 // Graficos.h
+unsigned long ultima_vez_thingspeak_actualizo = 0;
 void actualizarGraficos();
+inline bool inicializarThingSpeak();
+#define FIELD_TEMP_INT		1
+#define FIELD_TEMP_EXT		2
+#define FIELD_HUM_AIRE_INT	3
+#define FIELD_HUM_AIRE_EXT	4
+#define FIELD_HUM_SUELO_INT	5
+#define FIELD_HUM_SUELO_EXT	6
 
 // Telegram.h
 // variables
+#define TELEGRAM_TIEMPO_MAX_CONFIGURACION	15000UL
+#define DELAY_COMPROBACION_WIFI				60000UL		// cada un minuto comprueba la conexión a WiFi
+unsigned long ultima_vez_alarma_funciono = 0;
+unsigned long ultima_vez_comprobacion_WIFI = 0;
 String		chat_rpta; // necesariamente global para cambiarla en evaluarMensajeFloat() y evaluarMensajeInt()
 uint64_t 	chat_id = 0; // comienza en 0 para comprobaciones en chequearAlarma()
 uint16_t 	chat_numero_entrada_int;	// cuando preguntamos por un número entero de entrada
@@ -152,14 +127,15 @@ float		chat_numero_entrada_float;	// cuando preguntamos por un número con decim
 bool		chat_primer_mensaje = true; // para chequearMensajesRecibidosTelegram()
 // WiFi
 void conectarWIFI(bool parar_programa);
-bool conectarWIFICon(String Assid, String Apassword);
+bool conectarWIFICon(const String& Assid, const String& Apassword);
 void chequearConexion();
 // funciones varias
 void chequearMensajesRecibidosTelegram();
 void chequearAlarma();
-void enviarMensaje(uint64_t Aid, String Amensaje);
+void enviarMensaje(const uint64_t Aid, const String& Amensaje);
 bool evaluarMensajeInt(uint16_t Avalor_min, uint16_t Avalor_max, String Aunidad);
 bool evaluarMensajeFloat(float Avalor_min, float Avalor_max, String Aunidad);
+String mensajeMinutosATiempo(int minutos);
 // comandos
 void comandoStart();
 void comandoLecturas();
@@ -176,3 +152,61 @@ void comandoAlarma();
 void comandoHum();
 void comandoLed();
 void comandoReprog();
+
+
+// EEMPROM_manejo.h
+// funciones
+void chequearEEPROMProgramada();
+void setDireccionesEEPROM();
+void leerEEPROMProgramada();
+void cargarValoresPorDefecto();
+void imprimirEEPROMValsDirsReads();
+template <typename T>
+void escribirEEPROM(int Adireccion, T Adato); // template <typename T> T leerEEPROM(int Adireccion, T Adato);
+// variables de la EEPROM con sus valores por defecto
+#define TEMP_MAXIMA_ALARMA_DEFECTO		45.0F
+#define TEMP_MINIMA_ALARMA_DEFECTO		-5.0F
+#define TEMP_MAXIMA_VENTILACION_DEFECTO	35.0F
+#define HUMEDAD_SUELO_MINIMA_DEFECTO	60
+#define LAPSO_ALARMA_MINUTOS_DEFECTO	60
+#define ALARMA_ACTIVADA_DEFECTO			true
+#define TIEMPO_BOMBEO_SEGUNDOS_DEFECTO	10
+#define TIEMPO_ESPERA_MINUTOS_DEFECTO	15
+bool		EEPROM_programada;			// 0.	para verificar si está programada o no la EEPROM
+float		temp_maxima_alarma;			// 1.
+float		temp_minima_alarma;			// 2.
+float		temp_maxima_ventilacion;	// 3.
+uint8_t		humedad_suelo_minima;		// 4.	70 % es vaso de agua, 29 % es el aire
+uint16_t	lapso_alarma_minutos;		// 5.	60 minutos (máx 65535 min o 1092 horas o 45 días)
+bool		alarma_activada;			// 6.
+uint16_t	tiempo_bombeo_segundos;		// 7.	4 segundos (máx 65535 seg o 18,2 horas)
+uint16_t	tiempo_espera_minutos;		// 8.	15 minutos (máx 65535 min)
+// manejo de las direcciones de la EEPROM
+enum EEPROMDireccionesVariables
+{
+	DIR_EEPROM_PROGRAMADA,
+	DIR_TEMP_MAXIMA_ALARMA,
+	DIR_TEMP_MINIMA_ALARMA,
+	DIR_TEMP_MAXIMA_VENTILACION,
+	DIR_HUMEDAD_SUELO_MINIMA,
+	DIR_LAPSO_ALARMA_MINUTOS,
+	DIR_ALARMA_ACTIVADA,
+	DIR_TIEMPO_BOMBEO_SEGUNDOS,
+	DIR_TIEMPO_ESPERA_MINUTOS,
+	CANT_VARIABLES_EEPROM
+};
+										// bool, float, float, float, int8, int, bool, int, int
+const int LONGITUD_DATO_EEPROM[CANT_VARIABLES_EEPROM] = {1, 4, 4, 4, 1, 2, 1, 2, 2};
+int direccion[CANT_VARIABLES_EEPROM];
+int espacios_EEPROM;
+
+
+// Clases
+CTBot Bot;
+Servo Ventana;
+WiFiClient Cliente;
+Adafruit_SSD1306 Display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+DHT DhtInteriorLow(DHT_INT_LOW_PIN, DHT22);
+DHT DhtInteriorHigh(DHT_INT_HIGH_PIN, DHT22);
+DHT DhtExterior(DHT_EXT_PIN, DHT22);
+//DHT DhtInteriorMid(DHT_INT_MID_PIN, DHT22); // Para el domo

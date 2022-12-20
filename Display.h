@@ -7,7 +7,8 @@ void inicializarDisplay() // en "setup()"
 	if (!Display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
 	{
 		imprimirln("Fallo en el display. Resetear el equipo.");
-		while (1) ;
+		while (1)
+			;
 	}
 	delay(2000);
 	Display.clearDisplay();
@@ -23,7 +24,7 @@ void cambiarDatoDisplay()
 	case Temperatura:
 		DatoDelDisplay = Humedad;
 		break;
-	
+
 	case Humedad:
 		DatoDelDisplay = Temperatura;
 		break;
@@ -57,12 +58,12 @@ void displayErrorWIFI() // en "setup()"
 void displayConexionWIFI(String Amensaje_conectado_a, String Assid_conectada) // en "conectarWIFICon()"
 {
 	Display.clearDisplay();
-	Display.setTextSize(2);				// en grande:
+	Display.setTextSize(2); // en grande:
 	Display.setCursor(0, 0);
-	Display.print(Amensaje_conectado_a);// conectado a la red
-	Display.setTextSize(1);				// en chiquito:
+	Display.print(Amensaje_conectado_a); // conectado a la red
+	Display.setTextSize(1);				 // en chiquito:
 	Display.setCursor(0, 40);
-	Display.print(Assid_conectada);		// nombre de la red
+	Display.print(Assid_conectada); // nombre de la red
 	Display.display();
 }
 
@@ -77,13 +78,13 @@ void actualizarDisplay() // en "loop()"
 
 		switch (DatoDelDisplay)
 		{
-			case Temperatura:
-				displayTemp();
-				break;
+		case Temperatura:
+			displayTemp();
+			break;
 
-			case Humedad:
-				displayHum();
-				break;
+		case Humedad:
+			displayHum();
+			break;
 		}
 	}
 }
