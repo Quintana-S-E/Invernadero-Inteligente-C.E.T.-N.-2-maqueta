@@ -49,6 +49,10 @@ bool ventilacion_forzada	= false; // si el estado de ventilación está siendo f
 bool ventilando				= false;
 bool esperando_riego		= false; // para chequearRiego()
 
+// Tiempo.h
+String mensajeSegundosATiempo(unsigned long segundos);
+
+
 // Sensores.h
 #define MUESTRAS_HUMEDAD_SUELO 16		// 16 máximo
 void leerSensores();
@@ -89,8 +93,9 @@ void displayConectandoWIFI();
 void displayErrorWIFI();
 void displayConexionWIFI(String Amensaje_conectado_a, String Assid_conectada);
 void actualizarDisplay();
-void displayHum();
-void displayTemp();
+void displayHumedadAire();
+void displayHumedadSuelo();
+void displayTemperatura();
 #define DELAY_CAMBIO_DISPLAY		10000UL
 #define DELAY_ACTUALIZACION_DISPLAY	500UL
 #define SCREEN_WIDTH				128		// ancho del display OLED display, en píxeles
@@ -98,7 +103,8 @@ void displayTemp();
 enum DatoMostradoEnDisplay
 {
 	Temperatura,
-	Humedad
+	HumedadAire,
+	HumedadSuelo
 };
 DatoMostradoEnDisplay DatoDelDisplay = Temperatura;
 
@@ -135,7 +141,6 @@ void chequearAlarma();
 void enviarMensaje(const uint64_t Aid, const String& Amensaje);
 bool evaluarMensajeInt(uint16_t Avalor_min, uint16_t Avalor_max, String Aunidad);
 bool evaluarMensajeFloat(float Avalor_min, float Avalor_max, String Aunidad);
-String mensajeMinutosATiempo(int minutos);
 // comandos
 void comandoStart();
 void comandoLecturas();

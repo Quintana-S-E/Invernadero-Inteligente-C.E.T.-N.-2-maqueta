@@ -53,14 +53,15 @@ void leerDHT22Interiores() // en leerSensores()
 void leerSoilInteriores() // en leerSensores()
 {
 	int humedad_suelo_interior_raw[MUESTRAS_HUMEDAD_SUELO];
-	unsigned int humedad_suelo_interior_sum = 0;
+	unsigned int humedad_suelo_interior_suma = 0;
 	for (int i = 0; i < MUESTRAS_HUMEDAD_SUELO; i++)
 	{
 		humedad_suelo_interior_raw[i] = analogRead(SOIL_INT_PIN);
-		humedad_suelo_interior_sum += humedad_suelo_interior_raw[i];
+		humedad_suelo_interior_suma += humedad_suelo_interior_raw[i];
 	}
-	humedad_suelo_interior = (humedad_suelo_interior_sum / MUESTRAS_HUMEDAD_SUELO);
+	humedad_suelo_interior = (humedad_suelo_interior_suma / MUESTRAS_HUMEDAD_SUELO);
 	humedad_suelo_interior = map(humedad_suelo_interior, 0, 4095, 100, 0);
+	// TODO: el 70 % del agua pura debería ser 100 %, y el 29 % del aire debería ser 0 % (ver en tierra verdadera)
 }
 
 //==================================================================================================================//
@@ -85,12 +86,13 @@ void leerDHT22Exteriores() // en leerSensores()
 void leerSoilExteriores() // en leerSensores()
 {
 	int humedad_suelo_exterior_raw[MUESTRAS_HUMEDAD_SUELO];
-	unsigned int humedad_suelo_exterior_sum = 0;
+	unsigned int humedad_suelo_exterior_suma = 0;
 	for (int i = 0; i < MUESTRAS_HUMEDAD_SUELO; i++)
 	{
 		humedad_suelo_exterior_raw[i] = analogRead(SOIL_EXT_PIN);
-		humedad_suelo_exterior_sum += humedad_suelo_exterior_raw[i];
+		humedad_suelo_exterior_suma += humedad_suelo_exterior_raw[i];
 	}
-	humedad_suelo_exterior = (humedad_suelo_exterior_sum / MUESTRAS_HUMEDAD_SUELO);
+	humedad_suelo_exterior = (humedad_suelo_exterior_suma / MUESTRAS_HUMEDAD_SUELO);
 	humedad_suelo_exterior = map(humedad_suelo_exterior, 0, 4095, 100, 0);
+	// TODO: el 70 % del agua pura debería ser 100 %, y el 29 % del aire debería ser 0 % (ver en tierra verdadera)
 }

@@ -80,7 +80,7 @@ void cargarValoresPorDefecto()
 	EEPROM.put(direccion[DIR_ALARMA_ACTIVADA],			alarma_activada);
 	EEPROM.put(direccion[DIR_TIEMPO_BOMBEO_SEGUNDOS],	tiempo_bombeo_segundos);
 	EEPROM.put(direccion[DIR_TIEMPO_ESPERA_MINUTOS],	tiempo_espera_minutos);
-	EEPROM.commit(); // efectivamente escribimos los valores
+	EEPROM.commit(); // efectivamente escribir
 	EEPROM.end();
 }
 
@@ -91,7 +91,7 @@ void escribirEEPROM(int Adireccion, T Adato) // en chequearMensajesRecibidosTele
 {
 	EEPROM.begin(espacios_EEPROM);
 	EEPROM.put(Adireccion, Adato);
-	EEPROM.commit();
+	EEPROM.commit(); // efectivamente escribir
 	EEPROM.end();
 }
 

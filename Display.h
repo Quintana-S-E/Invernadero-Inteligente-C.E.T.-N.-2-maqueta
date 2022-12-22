@@ -22,10 +22,14 @@ void cambiarDatoDisplay()
 	switch (DatoDelDisplay)
 	{
 	case Temperatura:
-		DatoDelDisplay = Humedad;
+		DatoDelDisplay = HumedadAire;
 		break;
 
-	case Humedad:
+	case HumedadAire:
+		DatoDelDisplay = HumedadSuelo;
+		break;
+
+	case HumedadSuelo:
 		DatoDelDisplay = Temperatura;
 		break;
 	}
@@ -79,11 +83,15 @@ void actualizarDisplay() // en "loop()"
 		switch (DatoDelDisplay)
 		{
 		case Temperatura:
-			displayTemp();
+			displayTemperatura();
 			break;
 
-		case Humedad:
-			displayHum();
+		case HumedadAire:
+			displayHumedadAire();
+			break;
+
+		case HumedadSuelo:
+			displayHumedadSuelo();
 			break;
 		}
 	}
@@ -91,35 +99,59 @@ void actualizarDisplay() // en "loop()"
 
 //==================================================================================================================//
 
-void displayHum() // en "actualizarDisplay()"
+void displayHumedadAire() // en "actualizarDisplay()"
 {
 	// limpiar display
 	Display.clearDisplay();
 
-	// mostrar humedad aire
+	// mostrar humedad aire exterior
 	Display.setTextSize(1);
 	Display.setCursor(0, 0);
-	Display.print("Humedad del aire: ");
+	Display.print("Humedad aire exterior");
 	Display.setTextSize(2);
 	Display.setCursor(0, 10);
-	Display.print(humedad_aire_interior_promedio);
-	Display.print(" %");
+	Display.print(String(humedad_aire_exterior) + " %");
 
-	// mostrar humedad suelo
+	// mostrar humedad aire interior
 	Display.setTextSize(1);
 	Display.setCursor(0, 35);
-	Display.print("Humedades del suelo: ");
+	Display.print("Humedad aire interior");
 	Display.setTextSize(2);
 	Display.setCursor(0, 45);
-	Display.print(String(humedad_suelo_interior) + " %  ");
-	Display.print(String(humedad_suelo_exterior) + " %");
+	Display.print(String(humedad_aire_interior_promedio) + " %");
 
 	Display.display();
 }
 
 //==================================================================================================================//
 
-void displayTemp() // en "actualizarDisplay()"
+void displayHumedadSuelo() // en "actualizarDisplay()"
+{
+	// limpiar display
+	Display.clearDisplay();
+
+	// mostrar humedad suelo exterior (para varios sensores poner números en su lugar)
+	Display.setTextSize(1);
+	Display.setCursor(0, 0);
+	Display.print("Humedad del suelo ext");
+	Display.setTextSize(2);
+	Display.setCursor(0, 10);
+	Display.print(String(humedad_suelo_exterior) + " %");
+
+	// mostrar humedad suelo interior (para varios sensores poner números en su lugar)
+	Display.setTextSize(1);
+	Display.setCursor(0, 35);
+	Display.print("Humedad del suelo int");
+	Display.setTextSize(2);
+	Display.setCursor(0, 45);
+	Display.print(String(humedad_suelo_interior) + " %");
+
+	Display.display();
+}
+
+//==================================================================================================================//
+
+void displayTemperatura() // en "actualizarDisplay()"
 {
 	// limpiar display
 	Display.clearDisplay();
@@ -127,7 +159,7 @@ void displayTemp() // en "actualizarDisplay()"
 	// mostrar temperatura aire exterior
 	Display.setTextSize(1);
 	Display.setCursor(0, 0);
-	Display.print("Temp exterior: ");
+	Display.print("Temperatura exterior");
 	Display.setTextSize(2);
 	Display.setCursor(0, 10);
 	Display.print(temp_exterior);
@@ -141,7 +173,7 @@ void displayTemp() // en "actualizarDisplay()"
 	// mostrar temperatura aire interior
 	Display.setTextSize(1);
 	Display.setCursor(0, 35);
-	Display.print("Temp interior: ");
+	Display.print("Temperatura interior");
 	Display.setTextSize(2);
 	Display.setCursor(0, 45);
 	Display.print(temp_interior_promedio);

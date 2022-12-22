@@ -65,6 +65,12 @@ void desactivarVentilacion()
 	digitalWrite(PIN_VENTILADOR, HIGH);
 }
 
+//================================================FUTURAS VERSIONES=================================================//
+// Identifica la necesidad de iluminar, basándose en la lectura de un sensor LDR
+void chequear_iluminacion()
+{
+	// ...
+}
 //==========================HABILITAR PARA CUANDO SEPAREMOS LOS VENTILADORES DE LA VENTANA==========================//
 /*
 void abrirVentana()
@@ -78,13 +84,4 @@ void cerrarVentana()
 {
 	Ventana.write(ANGULO_CERRADO);
 }
-
-//================================================FUTURAS VERSIONES=================================================//
-void
-
-//================================================FUTURAS VERSIONES=================================================//
-// Identifica la necesidad de iluminar, basándose en la lectura de un sensor LDR
-void chequear_iluminacion()
-{
-	// ...
-}*/
+*/

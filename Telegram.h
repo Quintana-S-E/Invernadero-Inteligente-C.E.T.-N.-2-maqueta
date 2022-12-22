@@ -5,6 +5,7 @@
 #include "Display.h"
 #include "EEPROM_manejo.h"
 #include "Graficos.h"
+#include "Tiempo.h"
 
 void chequearMensajesRecibidosTelegram() // en "loop()"
 {
@@ -158,24 +159,24 @@ void comandoInfo()
 
 	chat_rpta += "•LED: ";
 	digitalRead(LED_ROJO) ? (chat_rpta += "encendido") : (chat_rpta += "apagado");
-	chat_rpta += ".\n\n";
+	chat_rpta += ".";
 
-	chat_rpta += "\nParámetros:\n"; // PARÁMETROS
+	chat_rpta += "\n\n\nParámetros:\n"; // PARÁMETROS
 	chat_rpta += "•Humedad mínima del suelo: ";
 	chat_rpta += String(humedad_suelo_minima);
 	chat_rpta += " %.\n";
 
 	chat_rpta += "•Lapso de envío de alarmas: ";
-	chat_rpta += mensajeMinutosATiempo(lapso_alarma_minutos);
+	chat_rpta += mensajeSegundosATiempo(lapso_alarma_minutos * 60);
 	chat_rpta += ".\n";
 
 	chat_rpta += "•Lapso de bombeo del riego: ";
-	chat_rpta += String(tiempo_bombeo_segundos);
-	chat_rpta += " segundos.\n";
+	chat_rpta += mensajeSegundosATiempo(tiempo_bombeo_segundos);
+	chat_rpta += ".\n";
 
 	chat_rpta += "•Lapso de espera luego del riego: ";
-	chat_rpta += String(tiempo_espera_minutos);
-	chat_rpta += " min.\n";
+	chat_rpta += mensajeSegundosATiempo(tiempo_espera_minutos * 60);
+	chat_rpta += ".\n";
 
 	chat_rpta += "•Temperaturas de la alarma: ";
 	chat_rpta += String(temp_minima_alarma);
@@ -244,7 +245,7 @@ void comandoVentilar()
 void comandoTiempoAl()
 {
 	chat_rpta = "El lapso de espera de la alarma está configurado en: ";
-	chat_rpta += mensajeMinutosATiempo(lapso_alarma_minutos);
+	chat_rpta += mensajeSegundosATiempo(lapso_alarma_minutos * 60);
 	enviarMensaje(chat_id, chat_rpta);
 
 	chat_rpta = "Introduzca un nuevo valor en minutos (mayor a 0)"; // máx 65535 o 1092 horas o 45 días
@@ -264,7 +265,7 @@ void comandoTiempoAl()
 void comandoTiempoRiego()
 {
 	chat_rpta = "El lapso de bombeo del riego está configurado en: ";
-	chat_rpta += String(tiempo_bombeo_segundos) + " segundos";
+	chat_rpta += mensajeSegundosATiempo(tiempo_bombeo_segundos);
 	enviarMensaje(chat_id, chat_rpta);
 
 	chat_rpta = "Introduzca un nuevo valor (entero, mayor a 0)"; // máx 65535 o 18,2 horas
@@ -283,10 +284,10 @@ void comandoTiempoRiego()
 void comandoTiempoEspera()
 {
 	chat_rpta = "El lapso de espera luego del riego está configurado en: ";
-	chat_rpta += String(tiempo_espera_minutos) + " minutos";
+	chat_rpta += mensajeSegundosATiempo(tiempo_espera_minutos * 60);
 	enviarMensaje(chat_id, chat_rpta);
 
-	chat_rpta = "Introduzca un nuevo valor (entero, mayor a 0)"; // máx 65535 o 1092 horas o 45 días
+	chat_rpta = "Introduzca un nuevo valor en minutos (entero, mayor a 0)"; // máx 65535 o 1092 horas o 45 días
 	enviarMensaje(chat_id, chat_rpta);
 
 	// setea chat_numero_entrada_int y la respuesta adecuada
@@ -416,35 +417,6 @@ void enviarMensaje(const uint64_t Aid, const String& Amensaje)
 	Bot.sendMessage(Aid, Amensaje);
 	imprimirln("Respuesta del BOT:");
 	imprimirln(Amensaje);
-}
-
-//==================================================================================================================//
-
-String mensajeMinutosATiempo(int minutos)
-{
-	int tiempo_horas = minutos / 60;
-	int tiempo_resto_minutos = minutos % 60;
-	char mensaje[20];
-
-	if (tiempo_horas == 0) // si no llega a la hora
-	{
-		if (tiempo_resto_minutos == 1)
-			sprintf(mensaje, "%d minuto", tiempo_resto_minutos);
-		else
-			sprintf(mensaje, "%d minutos", tiempo_resto_minutos);
-	}
-	else if (tiempo_resto_minutos == 0) // si da redondo en horas sin minutos
-	{
-		if (tiempo_horas == 1)
-			sprintf(mensaje, "%d hora", tiempo_horas);
-		else
-			sprintf(mensaje, "%d horas", tiempo_horas);
-	}
-	else
-	{
-		sprintf(mensaje, "%d h %d min", tiempo_horas, tiempo_resto_minutos);
-	}
-	return String(mensaje);
 }
 
 //==================================================================================================================//
@@ -639,4 +611,34 @@ bool conectarWIFICon(const String& Assid, const String& Apassword) // en "setup(
 	}
 
 	return false;
+*/
+
+
+
+/* TODO: Añadir en /info el tiempo que pasó desde el último riego. Después de •LED:
+
+	chat_rpta += "•Último riego: ";
+	chat_rpta += calcularTiempoDesdeUltimoRiego();
+
+	y la función sería:
+
+	String calcularTiempoDesdeUltimoRiego()
+	{
+		String mensaje;
+		if (ultima_vez_bomba_encendio == 0)
+			return "no se ha regado.";
+
+		mensaje = "hace ";
+		if (millis_hizo_overflow)
+			mensaje += "más de 49 días.";
+		else
+		{
+			unsigned long tiempo_desde_ultimo_riego_milis = millis() - ultima_vez_bomba_encendio;
+			mensaje += mensajeSegundosATiempo(tiempo_desde_ultimo_riego_milis / 1000UL);
+			mensaje += ".";
+		}
+		return mensaje;
+	}
+	faltaría definir millis_hizo_overflow con un simple if en el loop del main.cpp (hacerlo un margen de unas
+	17 horas antes del overflow, ya que este ocurre a los 49 días y 17 horas.)
 */
